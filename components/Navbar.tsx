@@ -5,17 +5,18 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation"; // Import usePathname
 import { useRouter } from "next/navigation";
-import { FiUser, FiLogOut } from "react-icons/fi";
+import { FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
 
 export default function Navbar() {
-  const [user, setUser] = useState<User | null>(null); // Perbarui tipe di sini
+  const [user, setUser] = useState<User | null>(null); // State user
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State untuk menu mobile
   const router = useRouter();
   const pathname = usePathname(); // Dapatkan path saat ini
 
   // Cek status autentikasi
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Tidak ada error karena tipe sudah benar
+      setUser(currentUser); // Update user
     });
     return () => unsubscribe();
   }, []);
@@ -23,14 +24,13 @@ export default function Navbar() {
   // Fungsi untuk logout
   const handleSignOut = async () => {
     if (confirm("Are you sure you want to sign out?")) {
-      // Konfirmasi sebelum sign out
       try {
         await signOut(auth);
-        alert("Successfully signed out!"); // Alert setelah sign out
-        router.push("/"); // Redirect ke halaman utama
+        alert("Successfully signed out!");
+        router.push("/");
       } catch (error: any) {
         console.error("Error signing out:", error.message);
-        alert("Error signing out: " + error.message); // Alert jika ada error
+        alert("Error signing out: " + error.message);
       }
     }
   };
@@ -39,14 +39,27 @@ export default function Navbar() {
     <nav className="bg-[#143F6B] text-white">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <div className="text-3xl font-bold text-left">
+        <div className="text-3xl font-bold">
           <Link href="/">ScholarHub</Link>
         </div>
 
-        {/* User Section and Navigation Links */}
-        <div className="flex items-center space-x-8">
-          {/* Navigation Links */}
-          <div className="flex space-x-8">
+        {/* Hamburger Menu for Mobile */}
+        <div className="md:hidden">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-white focus:outline-none"
+          >
+            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        </div>
+
+        {/* Navigation Links */}
+        <div
+          className={`${
+            isMenuOpen ? "block" : "hidden"
+          } absolute top-16 left-0 w-full bg-[#143F6B] z-50 md:static md:w-auto md:flex md:items-center`}
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:space-x-8 space-y-4 md:space-y-0 p-4 md:p-0">
             <Link
               href="/"
               className={`px-3 py-1 ${
@@ -77,37 +90,35 @@ export default function Navbar() {
             >
               About
             </Link>
-          </div>
 
-          {/* User Section */}
-          <div className="flex items-center space-x-4">
-            {user ? (
-              // Jika user sudah login
-              <>
+            {/* User Section */}
+            <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-4 md:space-y-0">
+              {user ? (
+                <>
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 hover:text-gray-300"
+                  >
+                    <FiUser size={20} />
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 px-4 py-2 border border-white text-white rounded-full hover:bg-red-600 transition"
+                  >
+                    <FiLogOut size={20} />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
                 <Link
-                  href="/profile"
-                  className="flex items-center gap-2 hover:text-gray-300"
+                  href="/auth/sign-in"
+                  className="px-4 py-2 border border-white text-white rounded-full hover:bg-gray-100 hover:text-blue-900 transition"
                 >
-                  <FiUser size={20} />
-                  Profile
+                  Sign In
                 </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-2 px-4 py-2 border border-white text-white rounded-full hover:bg-red-600 transition"
-                >
-                  <FiLogOut size={20} />
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              // Jika user belum login
-              <Link
-                href="/auth/sign-in"
-                className="px-4 py-2 border border-white text-white rounded-full hover:bg-gray-100 hover:text-blue-900 transition"
-              >
-                Sign In
-              </Link>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
