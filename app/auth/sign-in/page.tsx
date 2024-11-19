@@ -4,23 +4,28 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // Import ikon untuk visible/invisible
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function SignIn() {
   const [email, setEmail] = useState(""); // Ubah state menjadi email
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // State untuk efek loading
   const router = useRouter();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true); // Mulai loading
     try {
-      await signInWithEmailAndPassword(auth, email, password); // Ganti username menjadi email
+      await signInWithEmailAndPassword(auth, email, password); // Proses sign-in
       alert("Login berhasil!");
-      router.push("/");
+      router.push("/"); // Redirect ke halaman utama
     } catch (err: any) {
       console.error("Login gagal:", err.message);
+      alert("Error signing in: " + err.message);
+    } finally {
+      setIsLoading(false); // Selesai loading
     }
   };
 
@@ -46,11 +51,11 @@ export default function SignIn() {
               Email
             </label>
             <input
-              type="email" // Ubah tipe input menjadi email
+              type="email"
               id="email"
               placeholder="Enter Your Email"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-              value={email} // Ubah state menjadi email
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
@@ -73,7 +78,6 @@ export default function SignIn() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {/* Tombol untuk toggle visibility */}
             <button
               type="button"
               className="absolute top-1/2 bottom-1/2 right-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
@@ -104,13 +108,18 @@ export default function SignIn() {
           <div>
             <button
               type="submit"
-              className="w-full px-4 py-2 text-white bg-[#143F6B] rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-4 py-2 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#143F6B] hover:bg-blue-700"
+              }`}
+              disabled={isLoading} // Nonaktifkan tombol saat loading
             >
-              Sign In
+              {isLoading ? "Processing..." : "Sign In"}
             </button>
           </div>
 
-          <div className="text-sm text-center mt-4">
+          <div className="text-sm text-center text-white mt-4">
             Don’t have an account?{" "}
             <a
               href="/auth/sign-up"

@@ -4,25 +4,28 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebaseConfig";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // Import ikon untuk visible/invisible
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { doc, setDoc } from "firebase/firestore";
 
 export default function SignUp() {
-  const [fullName, setFullName] = useState(""); // State untuk Full Name
-  const [email, setEmail] = useState(""); // State untuk Email
-  const [password, setPassword] = useState(""); // State untuk Password
-  const [confirmPassword, setConfirmPassword] = useState(""); // State untuk Confirm Password
-  const [showPassword, setShowPassword] = useState(false); // State untuk visibility password
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State untuk visibility confirm password
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // State untuk efek loading
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
 
+    setIsLoading(true); // Mulai loading
     try {
       // Buat akun pengguna di Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
@@ -34,23 +37,21 @@ export default function SignUp() {
       // Dapatkan UID pengguna
       const userId = userCredential.user.uid;
 
-      // Log untuk memeriksa nilai
-      console.log("Full Name:", fullName);
-      console.log("Email:", email);
-
       // Simpan data pengguna ke Firestore
       await setDoc(doc(db, "users", userId), {
         fullName: fullName,
         email: email,
+        role: "user", // Tambahkan role otomatis sebagai "user"
         createdAt: new Date(),
       });
 
-      console.log("Data berhasil disimpan di Firestore!");
       alert("Account created successfully!");
-      router.push("/"); // Redirect ke halaman Sign In setelah berhasil
+      router.push("/"); // Redirect ke halaman utama
     } catch (err: any) {
       console.error("Error creating account:", err.message);
       alert("Error creating account: " + err.message);
+    } finally {
+      setIsLoading(false); // Selesai loading
     }
   };
 
@@ -114,7 +115,7 @@ export default function SignUp() {
               Password
             </label>
             <input
-              type={showPassword ? "text" : "password"} // Tipe input berdasarkan visibility
+              type={showPassword ? "text" : "password"}
               id="password"
               placeholder="Enter Your Password"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
@@ -122,11 +123,10 @@ export default function SignUp() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            {/* Tombol untuk toggle visibility */}
             <button
               type="button"
               className="absolute top-1/2 bottom-1/2 right-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              onClick={() => setShowPassword(!showPassword)} // Toggle visibility
+              onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
             </button>
@@ -141,7 +141,7 @@ export default function SignUp() {
               Confirm Password
             </label>
             <input
-              type={showConfirmPassword ? "text" : "password"} // Tipe input berdasarkan visibility
+              type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
               placeholder="Confirm Your Password"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
@@ -149,11 +149,10 @@ export default function SignUp() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            {/* Tombol untuk toggle visibility */}
             <button
               type="button"
               className="absolute top-1/2 bottom-1/2 right-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Toggle visibility
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               {showConfirmPassword ? (
                 <FiEyeOff size={20} />
@@ -167,13 +166,18 @@ export default function SignUp() {
           <div>
             <button
               type="submit"
-              className="w-full px-4 py-2 text-white bg-[#143F6B] rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-4 py-2 text-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#143F6B] hover:bg-blue-700"
+              }`}
+              disabled={isLoading} // Tombol dinonaktifkan saat loading
             >
-              Sign Up
+              {isLoading ? "Processing..." : "Sign Up"}
             </button>
           </div>
 
-          <div className="text-sm text-center mt-4">
+          <div className="text-sm text-center mt-4 text-white">
             Already have an account?{" "}
             <a
               href="/auth/sign-in"

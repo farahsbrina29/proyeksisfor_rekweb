@@ -1,9 +1,11 @@
+"use client";
+
 // Import modul Firebase yang dibutuhkan
 import { initializeApp } from "firebase/app";
+import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
-import { getAnalytics } from "firebase/analytics";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyCJUO7Bdpnv2X2mlDOHO3C4lPgOiat392k",
@@ -21,11 +23,18 @@ const app = initializeApp(firebaseConfig);
 // Modul Firebase yang sering digunakan
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
-const analytics = getAnalytics(app);
-// Cek apakah window.analytics tersedia sebelum menginisialisasi analytics
-if (typeof window !== "undefined" && "analytics" in window) {
-  const analytics = getAnalytics(app);
+
+// Inisialisasi analytics hanya jika didukung
+let analytics: any = null;
+if (typeof window !== "undefined") {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+      console.log("Analytics initialized");
+    } else {
+      console.log("Analytics not supported in this environment");
+    }
+  });
 }
-// Ekspor modul Firebase
-export { app, auth, db, storage, analytics };
+
+export { app, auth, db, analytics };
