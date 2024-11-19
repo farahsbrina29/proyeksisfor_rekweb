@@ -81,6 +81,16 @@ export default function Navbar() {
               Scholars
             </Link>
             <Link
+              href="/status"
+              className={`px-3 py-1 ${
+                pathname === "/status"
+                  ? "text-white font-bold"
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              Status
+            </Link>
+            <Link
               href="/about"
               className={`px-3 py-1 ${
                 pathname === "/about"
