@@ -39,7 +39,7 @@ export default function Navbar() {
     <nav className="bg-[#143F6B] text-white">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
-        <div className="text-xl font-bold text-left">
+        <div className="text-3xl font-bold text-left">
           <Link href="/">ScholarHub</Link>
         </div>
 
