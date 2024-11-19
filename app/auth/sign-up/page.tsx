@@ -3,80 +3,186 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebaseConfig";
+import { auth, db } from "@/lib/firebaseConfig";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // Import ikon untuk visible/invisible
+import { doc, setDoc } from "firebase/firestore";
 
 export default function SignUp() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [fullName, setFullName] = useState(""); // State untuk Full Name
+  const [email, setEmail] = useState(""); // State untuk Email
+  const [password, setPassword] = useState(""); // State untuk Password
+  const [confirmPassword, setConfirmPassword] = useState(""); // State untuk Confirm Password
+  const [showPassword, setShowPassword] = useState(false); // State untuk visibility password
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State untuk visibility confirm password
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert("Registrasi berhasil!");
-      router.push("/auth/sign-in");
+      // Buat akun pengguna di Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      // Dapatkan UID pengguna
+      const userId = userCredential.user.uid;
+
+      // Log untuk memeriksa nilai
+      console.log("Full Name:", fullName);
+      console.log("Email:", email);
+
+      // Simpan data pengguna ke Firestore
+      await setDoc(doc(db, "users", userId), {
+        fullName: fullName,
+        email: email,
+        createdAt: new Date(),
+      });
+
+      console.log("Data berhasil disimpan di Firestore!");
+      alert("Account created successfully!");
+      router.push("/"); // Redirect ke halaman Sign In setelah berhasil
     } catch (err: any) {
-      setError("Registrasi gagal: " + err.message);
+      console.error("Error creating account:", err.message);
+      alert("Error creating account: " + err.message);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold text-center text-green-600 mb-6">
-          Sign Up
-        </h1>
-        <form onSubmit={handleSignUp}>
-          <div className="mb-4">
+    <div
+      className="relative flex min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/assets/signup.jpg')" }}
+    >
+      {/* Left Section */}
+      <div className="flex-1 flex items-center justify-center bg-black bg-opacity-50">
+        <h1 className="text-6xl font-bold text-white">Create Your Account!</h1>
+      </div>
+
+      {/* Right Section */}
+      <div className="flex-1 flex items-center justify-center bg-black bg-opacity-50">
+        <form className="w-full max-w-md space-y-6" onSubmit={handleSignUp}>
+          {/* Full Name */}
+          <div>
+            <label
+              htmlFor="fullName"
+              className="block text-sm font-medium text-white"
+            >
+              Full Name
+            </label>
+            <input
+              type="text"
+              id="fullName"
+              placeholder="Enter Your Full Name"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-white"
             >
               Email
             </label>
             <input
               type="email"
               id="email"
-              className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Enter your email"
+              placeholder="Enter Your Email"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className="mb-4">
+
+          {/* Password */}
+          <div className="relative">
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-white"
             >
               Password
             </label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"} // Tipe input berdasarkan visibility
               id="password"
-              className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Enter your password"
+              placeholder="Enter Your Password"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {/* Tombol untuk toggle visibility */}
+            <button
+              type="button"
+              className="absolute top-1/2 bottom-1/2 right-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowPassword(!showPassword)} // Toggle visibility
+            >
+              {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+            </button>
           </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          <button
-            type="submit"
-            className="w-full px-4 py-2 mt-4 text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none"
-          >
-            Sign Up
-          </button>
+
+          {/* Confirm Password */}
+          <div className="relative">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-white"
+            >
+              Confirm Password
+            </label>
+            <input
+              type={showConfirmPassword ? "text" : "password"} // Tipe input berdasarkan visibility
+              id="confirmPassword"
+              placeholder="Confirm Your Password"
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+            {/* Tombol untuk toggle visibility */}
+            <button
+              type="button"
+              className="absolute top-1/2 bottom-1/2 right-4 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Toggle visibility
+            >
+              {showConfirmPassword ? (
+                <FiEyeOff size={20} />
+              ) : (
+                <FiEye size={20} />
+              )}
+            </button>
+          </div>
+
+          {/* Submit Button */}
+          <div>
+            <button
+              type="submit"
+              className="w-full px-4 py-2 text-white bg-[#143F6B] rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Sign Up
+            </button>
+          </div>
+
+          <div className="text-sm text-center mt-4">
+            Already have an account?{" "}
+            <a
+              href="/auth/sign-in"
+              className="font-medium text-blue-400 hover:underline"
+            >
+              Sign In
+            </a>
+          </div>
         </form>
-        <p className="mt-4 text-sm text-center text-gray-600">
-          Sudah punya akun?{" "}
-          <a href="/auth/sign-in" className="text-green-500 hover:underline">
-            Login di sini
-          </a>
-        </p>
       </div>
     </div>
   );

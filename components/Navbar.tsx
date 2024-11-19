@@ -21,12 +21,16 @@ export default function Navbar() {
 
   // Fungsi untuk logout
   const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      alert("Successfully signed out!");
-      router.push("/"); // Redirect ke halaman utama
-    } catch (error: any) {
-      console.error("Error signing out:", error.message);
+    if (confirm("Are you sure you want to sign out?")) {
+      // Konfirmasi sebelum sign out
+      try {
+        await signOut(auth);
+        alert("Successfully signed out!"); // Alert setelah sign out
+        router.push("/"); // Redirect ke halaman utama
+      } catch (error: any) {
+        console.error("Error signing out:", error.message);
+        alert("Error signing out: " + error.message); // Alert jika ada error
+      }
     }
   };
 

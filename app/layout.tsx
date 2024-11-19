@@ -1,17 +1,25 @@
-import Navbar from "@/components/Navbar";
-import "../styles/globals.css"; 
+"use client";
 
+import { usePathname } from "next/navigation";
+import Navbar from "@/components/Navbar"; // Navbar Anda
+import "../styles/globals.css"; 
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  // Tentukan path yang tidak membutuhkan Navbar
+  const noNavbarRoutes = ["/auth/sign-up", "/auth/sign-in"];
+
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        <main>{children}</main>
+        {!noNavbarRoutes.includes(pathname) && <Navbar />}{" "}
+        {/* Tampilkan Navbar kecuali di halaman tertentu */}
+        {children}
       </body>
     </html>
   );
