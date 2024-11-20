@@ -56,19 +56,14 @@ const ButtonContainer = styled.div`
   margin-left: 50px;
 `;
 
-interface ButtonProps {
-  isSelected: boolean;
-}
-
-const Button = styled.button<ButtonProps>`
-  background-color: ${(props) => (props.isSelected ? "#143F6B" : "#D9D9D9")};
-  color: ${(props) => (props.isSelected ? "white" : "black")};
+// Styled Button Component
+const Button = styled.button<{ $isSelected: boolean }>`
+  background-color: ${(props) => (props.$isSelected ? "#143F6B" : "#D9D9D9")};
+  color: ${(props) => (props.$isSelected ? "white" : "black")};
   border: none;
   padding: 8px 16px;
   margin: 5px;
   text-align: center;
-  text-decoration: none;
-  display: inline-block;
   font-size: 20px;
   cursor: pointer;
   border-radius: 15px;
@@ -77,7 +72,7 @@ const Button = styled.button<ButtonProps>`
   transition: background-color 0.3s ease, transform 0.2s ease;
 
   &:hover {
-    background-color: #143F6B;
+    background-color: #143f6b;
     color: white;
     transform: scale(1.1);
   }
@@ -124,15 +119,24 @@ export default function Home() {
   return (
     <div>
       <div className="bg-white py-16 px-6 sm:px-8 md:px-16 mt-10">
-        <h1 className="text-4xl font-bold text-blue-900 mb-12">Found Scholar</h1>
+        <h1 className="text-4xl font-bold text-blue-900 mb-12">
+          Found Scholar
+        </h1>
 
         <Container>
           {/* Filter Section */}
           <ButtonContainer>
-            {["All", "Active", "Non Active", "Academic", "Non Academic", "Bursary"].map((filter) => (
+            {[
+              "All",
+              "Active",
+              "Non Active",
+              "Academic",
+              "Non Academic",
+              "Bursary",
+            ].map((filter) => (
               <Button
                 key={filter}
-                isSelected={selectedFilter === filter}
+                $isSelected={selectedFilter === filter}
                 onClick={() => handleFilterClick(filter)}
               >
                 {filter}
@@ -144,7 +148,9 @@ export default function Home() {
           <CardsContainer>
             {filteredScholarships.map((scholarship) => (
               <Card key={scholarship.id}>
-                <h2 className="text-xl font-bold mb-2 text-black">{scholarship.title}</h2>
+                <h2 className="text-xl font-bold mb-2 text-black">
+                  {scholarship.title}
+                </h2>
                 <p className="text-black text-sm mb-4">{scholarship.date}</p>
                 <p className="text-gray-700 mb-4">{scholarship.description}</p>
                 <button className="text-blue-600 font-semibold hover:underline">
