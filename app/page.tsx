@@ -1,15 +1,7 @@
 import HeroSection from "../components/heroSection";
 import Footer from "../components/footer";
-import { scholarships, parseCustomDate } from "../app/data/scholarshipdata";
+import { scholarships, getScholarshipStatus } from "../app/data/scholarshipdata";
 
-// Function to determine if the scholarship is Active or Inactive
-function getScholarshipStatus(startDate: string, endDate: string): string {
-  const today = new Date();
-  const start = parseCustomDate(startDate);
-  const end = parseCustomDate(endDate);
-
-  return today >= start && today <= end ? "Active" : "Inactive";
-}
 
 export default function Home() {
   return (

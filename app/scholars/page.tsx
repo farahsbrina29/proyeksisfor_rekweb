@@ -2,42 +2,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Footer from "../../components/footer";
-
-// Data scholarships
-const scholarships = [
-  {
-    id: 1,
-    title: "Telkom University S1 Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    description:
-      "Lorem ipsum dolor sit amet. Est provident explicabo eum aliquid quidem ex molestiae natus est ipsam illo et natus recusandae. Ut omnis iste id consequatur quas rem eligendi repudiandae et nihil dolor et aliquam voluptas hic minima sapiente est laboriosam […]",
-    category: "Academic",
-  },
-  {
-    id: 2,
-    title: "Non-Academic Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    description:
-      "Lorem ipsum dolor sit amet. Est provident explicabo eum aliquid quidem ex molestiae natus est ipsam illo et natus recusandae. Ut omnis iste id consequatur quas rem eligendi repudiandae et nihil dolor et aliquam voluptas hic minima sapiente est laboriosam […]",
-    category: "Non Academic",
-  },
-  {
-    id: 3,
-    title: "Active Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    description:
-      "Lorem ipsum dolor sit amet. Est provident explicabo eum aliquid quidem ex molestiae natus est ipsam illo et natus recusandae. Ut omnis iste id consequatur quas rem eligendi repudiandae et nihil dolor et aliquam voluptas hic minima sapiente est laboriosam […]",
-    category: "Active",
-  },
-  {
-    id: 4,
-    title: "Bursary Program",
-    date: "20 November 2024 - 12 Desember 2024",
-    description:
-      "Lorem ipsum dolor sit amet. Est provident explicabo eum aliquid quidem ex molestiae natus est ipsam illo et natus recusandae. Ut omnis iste id consequatur quas rem eligendi repudiandae et nihil dolor et aliquam voluptas hic minima sapiente est laboriosam […]",
-    category: "Bursary",
-  },
-];
+import { scholarships, parseCustomDate } from "../data/scholarshipdata"; // Import data and utility
 
 // Styled components
 const Container = styled.div`
@@ -56,7 +21,6 @@ const ButtonContainer = styled.div`
   margin-left: 50px;
 `;
 
-// Styled Button Component
 const Button = styled.button<{ $isSelected: boolean }>`
   background-color: ${(props) => (props.$isSelected ? "#143F6B" : "#D9D9D9")};
   color: ${(props) => (props.$isSelected ? "white" : "black")};
@@ -107,14 +71,28 @@ const Card = styled.div`
 export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState("All");
 
+  // Function to handle button click for filtering
   const handleFilterClick = (filter: string) => {
     setSelectedFilter(filter);
   };
 
+  // Function to determine if the scholarship is active
+  const isActiveScholarship = (startDate: string, endDate: string): boolean => {
+    const today = new Date();
+    const start = parseCustomDate(startDate);
+    const end = parseCustomDate(endDate);
+    return today >= start && today <= end;
+  };
+
+  // Filter scholarships based on selected filter
   const filteredScholarships =
     selectedFilter === "All"
       ? scholarships
-      : scholarships.filter((s) => s.category === selectedFilter);
+      : selectedFilter === "Active"
+      ? scholarships.filter((s) => isActiveScholarship(s.startDate, s.endDate))
+      : selectedFilter === "Inactive"
+      ? scholarships.filter((s) => !isActiveScholarship(s.startDate, s.endDate))
+      : scholarships.filter((s) => s.tags.includes(selectedFilter));
 
   return (
     <div>
@@ -129,7 +107,7 @@ export default function Home() {
             {[
               "All",
               "Active",
-              "Non Active",
+              "Inactive",
               "Academic",
               "Non Academic",
               "Bursary",
@@ -151,8 +129,12 @@ export default function Home() {
                 <h2 className="text-xl font-bold mb-2 text-black">
                   {scholarship.title}
                 </h2>
-                <p className="text-black text-sm mb-4">{scholarship.date}</p>
-                <p className="text-gray-700 mb-4">{scholarship.description}</p>
+                <p className="text-black text-sm mb-4">
+                  {scholarship.startDate} - {scholarship.endDate}
+                </p>
+                <p className="text-gray-700 mb-4">
+                  {scholarship.tags.join(", ")}
+                </p>
                 <button className="text-blue-600 font-semibold hover:underline">
                   Read More
                 </button>

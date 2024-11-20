@@ -20,6 +20,14 @@ export function parseCustomDate(dateString: string): Date {
   return new Date(Number(year), months[month], parseInt(day, 10));
 }
 
+export function getScholarshipStatus(startDate: string, endDate: string): string {
+  const today = new Date();
+  const start = parseCustomDate(startDate);
+  const end = parseCustomDate(endDate);
+
+  return today >= start && today <= end ? "Active" : "Inactive";
+}
+
 // Scholarship data
 export const scholarships = [
   {
