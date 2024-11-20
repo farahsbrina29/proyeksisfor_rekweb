@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import HeroSection from "../components/heroSection";
 import Footer from "../components/footer";
 import Link from "next/link";
@@ -10,6 +11,30 @@ import {
 } from "../app/data/scholarshipdata";
 
 export default function Home() {
+  const [selectedFilter, setSelectedFilter] = useState("All"); // State untuk menyimpan filter aktif
+
+  // Fungsi untuk memfilter daftar beasiswa berdasarkan kategori atau status
+  const filteredScholarships = scholarships.filter((scholarship) => {
+    if (selectedFilter === "All") return true;
+    if (selectedFilter === "Active") {
+      return (
+        getScholarshipStatus(
+          scholarship.tanggal_mulai,
+          scholarship.tanggal_akhir
+        ) === "Active"
+      );
+    }
+    if (selectedFilter === "Inactive") {
+      return (
+        getScholarshipStatus(
+          scholarship.tanggal_mulai,
+          scholarship.tanggal_akhir
+        ) === "Inactive"
+      );
+    }
+    return scholarship.kategori === selectedFilter;
+  });
+
   return (
     <div>
       <HeroSection />
@@ -24,22 +49,40 @@ export default function Home() {
               Filter by
             </h2>
             <ul className="space-y-4 text-lg">
-              <li className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("All")}
+              >
                 All
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Active")}
+              >
                 Active
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Inactive")}
+              >
                 Inactive
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pt-4 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pt-4 pb-2"
+                onClick={() => setSelectedFilter("Akademik")}
+              >
                 Akademik
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Non Akademik")}
+              >
                 Non Akademik
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Bantuan")}
+              >
                 Bantuan
               </li>
             </ul>
@@ -47,7 +90,7 @@ export default function Home() {
 
           {/* Cards Section */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {scholarships.slice(0, 6).map((scholarship) => (
+            {filteredScholarships.slice(0, 6).map((scholarship) => (
               <Link
                 key={scholarship.id}
                 href={`/scholars/${scholarship.id}`} // Tautan ke halaman detail sesuai dengan ID beasiswa
@@ -61,9 +104,9 @@ export default function Home() {
                     {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
                     {formatCustomDate(scholarship.tanggal_akhir)}
                   </p>
-                    <p className="text-black text-sm mb-4">
+                  <p className="text-black text-sm mb-4">
                     {scholarship.deskripsi.split(".")[0]}.
-                    </p>
+                  </p>
                   <div className="flex items-center space-x-2 mb-4">
                     <span
                       className={`px-2 py-1 rounded-full text-sm ${
