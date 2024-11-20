@@ -1,7 +1,10 @@
 import HeroSection from "../components/heroSection";
 import Footer from "../components/footer";
-import { scholarships, getScholarshipStatus } from "../app/data/scholarshipdata";
-
+import {
+  scholarships,
+  getScholarshipStatus,
+  formatCustomDate,
+} from "../app/data/scholarshipdata";
 
 export default function Home() {
   return (
@@ -28,13 +31,13 @@ export default function Home() {
                 Inactive
               </li>
               <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pt-4 pb-2">
-                Academic
+                Akademik
               </li>
               <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
-                Non Academic
+                Non Akademik
               </li>
               <li className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2">
-                Bursary
+                Bantuan
               </li>
             </ul>
           </div>
@@ -47,35 +50,34 @@ export default function Home() {
                 className="border rounded-lg p-6 shadow-md hover:shadow-lg transition"
               >
                 <h3 className="text-xl font-bold mb-2 text-black">
-                  {scholarship.title}
+                  {scholarship.nama_beasiswa}
                 </h3>
                 <p className="text-black text-sm mb-4">
-                  {scholarship.startDate} - {scholarship.endDate}
+                  {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                  {formatCustomDate(scholarship.tanggal_akhir)}
+                </p>
+                <p className="text-black text-sm mb-4">
+                  {scholarship.deskripsi}
                 </p>
                 <div className="flex items-center space-x-2 mb-4">
                   <span
                     className={`px-2 py-1 rounded-full text-sm ${
                       getScholarshipStatus(
-                        scholarship.startDate,
-                        scholarship.endDate
+                        scholarship.tanggal_mulai,
+                        scholarship.tanggal_akhir
                       ) === "Active"
                         ? "bg-green-200 text-green-700"
                         : "bg-red-200 text-red-700"
                     }`}
                   >
                     {getScholarshipStatus(
-                      scholarship.startDate,
-                      scholarship.endDate
+                      scholarship.tanggal_mulai,
+                      scholarship.tanggal_akhir
                     )}
                   </span>
-                  {scholarship.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                    {scholarship.kategori}
+                  </span>
                 </div>
                 <button className="text-blue-600 font-semibold hover:underline">
                   See Details

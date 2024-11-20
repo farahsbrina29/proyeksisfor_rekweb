@@ -1,29 +1,38 @@
 // Scholarship data and utilities
-const months: { [key: string]: number } = {
-  Januari: 0,
-  Februari: 1,
-  Maret: 2,
-  April: 3,
-  Mei: 4,
-  Juni: 5,
-  Juli: 6,
-  Agustus: 7,
-  September: 8,
-  Oktober: 9,
-  November: 10,
-  Desember: 11,
-};
+const monthsIndo = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
 
-// Function to parse custom date
-export function parseCustomDate(dateString: string): Date {
-  const [day, month, year] = dateString.split(" ");
-  return new Date(Number(year), months[month], parseInt(day, 10));
+// Parsing dari format DD-MM-YYYY ke objek Date
+export function parseCustomDate(dateString: string) {
+  const [day, month, year] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day); // Bulan dikurangi 1 karena indeks bulan mulai dari 0
 }
 
-export function getScholarshipStatus(startDate: string, endDate: string): string {
+// Format objek Date menjadi "20 November 2024"
+export function formatCustomDate(dateString: string) {
+  const date = parseCustomDate(dateString);
+  const day = date.getDate();
+  const month = monthsIndo[date.getMonth()];
+  const year = date.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
+export function getScholarshipStatus(tanggal_mulai: string, tanggal_akhir: string): string {
   const today = new Date();
-  const start = parseCustomDate(startDate);
-  const end = parseCustomDate(endDate);
+  const start = parseCustomDate(tanggal_mulai);
+  const end = parseCustomDate(tanggal_akhir);
 
   return today >= start && today <= end ? "Active" : "Inactive";
 }
@@ -31,73 +40,112 @@ export function getScholarshipStatus(startDate: string, endDate: string): string
 // Scholarship data
 export const scholarships = [
   {
-    id: 1,
-    title: "Telkom University S1 Scholarship",
-    startDate: "20 November 2024",
-    endDate: "12 Desember 2024",
-    tags: ["Academic"],
+    id: "001",
+    nama_beasiswa: "Beasiswa Unggulan",
+    deskripsi: "Beasiswa ini ditujukan untuk mahasiswa berprestasi.",
+    persyaratan_beasiswa:
+      "Mahasiswa dengan IPK minimal 3.5 dan aktif dalam organisasi.",
+    kategori: "Akademik",
+    tanggal_mulai: "01-11-2024",
+    tanggal_akhir: "30-11-2024",
+    kontak: "beasiswa@example.com",
   },
   {
-    id: 2,
-    title: "Telkom University D3 Scholarship",
-    startDate: "1 November 2024",
-    endDate: "18 November 2024",
-    tags: ["Non Academic"],
+    id: "002",
+    nama_beasiswa: "Beasiswa Prestasi Telkom University",
+    deskripsi: "Beasiswa untuk mahasiswa dengan prestasi akademik tinggi.",
+    persyaratan_beasiswa:
+      "Mahasiswa dengan nilai rata-rata A di semester terakhir.",
+    kategori: "Akademik",
+    tanggal_mulai: "05-11-2024",
+    tanggal_akhir: "10-12-2024",
+    kontak: "prestasi@telkomuniversity.ac.id",
   },
   {
-    id: 3,
-    title: "Government Bursary Program",
-    startDate: "15 November 2024",
-    endDate: "30 November 2024",
-    tags: ["Bursary"],
+    id: "003",
+    nama_beasiswa: "Bantuan Pendidikan Pemerintah",
+    deskripsi: "Bantuan pendidikan untuk siswa dari keluarga kurang mampu.",
+    persyaratan_beasiswa:
+      "Surat keterangan tidak mampu dari pemerintah setempat.",
+    kategori: "Bantuan",
+    tanggal_mulai: "15-10-2024",
+    tanggal_akhir: "20-11-2024",
+    kontak: "bantuan@pemerintah.go.id",
   },
   {
-    id: 4,
-    title: "Science Research Grant",
-    startDate: "10 Oktober 2024",
-    endDate: "30 November 2024",
-    tags: ["Research", "Academic"],
+    id: "004",
+    nama_beasiswa: "Beasiswa Penelitian Sains",
+    deskripsi: "Beasiswa untuk mahasiswa yang terlibat dalam penelitian sains.",
+    persyaratan_beasiswa:
+      "Proposal penelitian yang disetujui oleh dosen pembimbing.",
+    kategori: "Penelitian",
+    tanggal_mulai: "01-09-2024",
+    tanggal_akhir: "30-11-2024",
+    kontak: "penelitian@sains.com",
   },
   {
-    id: 5,
-    title: "Sports Excellence Scholarship",
-    startDate: "5 September 2024",
-    endDate: "25 November 2024",
-    tags: ["Sports", "Non Academic"],
+    id: "005",
+    nama_beasiswa: "Beasiswa Atlet Berprestasi",
+    deskripsi: "Beasiswa untuk mahasiswa yang aktif dalam bidang olahraga.",
+    persyaratan_beasiswa:
+      "Memiliki medali atau penghargaan dalam bidang olahraga.",
+    kategori: "Non Akademik",
+    tanggal_mulai: "15-08-2024",
+    tanggal_akhir: "25-11-2024",
+    kontak: "olahraga@example.com",
   },
   {
-    id: 6,
-    title: "Arts and Culture Award",
-    startDate: "1 November 2024",
-    endDate: "20 Desember 2024",
-    tags: ["Arts", "Academic"],
+    id: "006",
+    nama_beasiswa: "Beasiswa Seni dan Budaya",
+    deskripsi: "Beasiswa untuk mahasiswa dengan bakat seni dan budaya.",
+    persyaratan_beasiswa:
+      "Portfolio seni atau budaya yang diakui oleh institusi.",
+    kategori: "Seni",
+    tanggal_mulai: "01-10-2024",
+    tanggal_akhir: "15-12-2024",
+    kontak: "seni@budaya.com",
   },
   {
-    id: 7,
-    title: "Community Leadership Scholarship",
-    startDate: "10 November 2024",
-    endDate: "30 Desember 2024",
-    tags: ["Leadership", "Academic"],
+    id: "007",
+    nama_beasiswa: "Beasiswa Kepemimpinan",
+    deskripsi:
+      "Beasiswa untuk mahasiswa dengan kemampuan kepemimpinan luar biasa.",
+    persyaratan_beasiswa: "Surat rekomendasi dari organisasi yang diikuti.",
+    kategori: "Kepemimpinan",
+    tanggal_mulai: "10-11-2024",
+    tanggal_akhir: "30-12-2024",
+    kontak: "kepemimpinan@beasiswa.com",
   },
   {
-    id: 8,
-    title: "Engineering Innovation Grant",
-    startDate: "15 Oktober 2024",
-    endDate: "25 November 2024",
-    tags: ["Innovation", "Research"],
+    id: "008",
+    nama_beasiswa: "Hibah Inovasi Teknik",
+    deskripsi: "Hibah untuk mahasiswa teknik dengan inovasi terbaik.",
+    persyaratan_beasiswa: "Makalah inovasi yang telah dipublikasikan.",
+    kategori: "Inovasi",
+    tanggal_mulai: "01-10-2024",
+    tanggal_akhir: "30-11-2024",
+    kontak: "inovasi@teknik.com",
   },
   {
-    id: 9,
-    title: "Healthcare Professionals Grant",
-    startDate: "1 November 2024",
-    endDate: "30 November 2024",
-    tags: ["Healthcare", "Bursary"],
+    id: "009",
+    nama_beasiswa: "Beasiswa Profesi Kesehatan",
+    deskripsi:
+      "Beasiswa untuk mahasiswa yang menempuh studi di bidang kesehatan.",
+    persyaratan_beasiswa:
+      "Surat penerimaan dari institusi kesehatan terakreditasi.",
+    kategori: "Kesehatan",
+    tanggal_mulai: "01-11-2024",
+    tanggal_akhir: "10-11-2024",
+    kontak: "kesehatan@beasiswa.com",
   },
   {
-    id: 10,
-    title: "Entrepreneurship Excellence Award",
-    startDate: "20 Oktober 2024",
-    endDate: "30 November 2024",
-    tags: ["Entrepreneurship", "Non Academic"],
+    id: "010",
+    nama_beasiswa: "Penghargaan Kewirausahaan",
+    deskripsi: "Penghargaan untuk mahasiswa dengan bisnis inovatif.",
+    persyaratan_beasiswa: "Proposal bisnis dan laporan keuangan startup.",
+    kategori: "Kewirausahaan",
+    tanggal_mulai: "20-09-2024",
+    tanggal_akhir: "19-11-2024",
+    kontak: "wirausaha@beasiswa.com",
   },
 ];
