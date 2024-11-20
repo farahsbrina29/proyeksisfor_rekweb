@@ -165,6 +165,9 @@ export default function Home() {
                       scholarship.tanggal_akhir
                     )}
                   </span>
+                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                    {scholarship.kategori}
+                  </span>
                 </div>
                 <button className="text-blue-600 font-semibold hover:underline">
                   Read More
