@@ -1,9 +1,40 @@
+"use client";
+
+import { useState } from "react";
 import HeroSection from "../components/heroSection";
 import Footer from "../components/footer";
-import { scholarships, getScholarshipStatus } from "../app/data/scholarshipdata";
-
+import Link from "next/link";
+import {
+  scholarships,
+  getScholarshipStatus,
+  formatCustomDate,
+} from "../app/data/scholarshipdata";
 
 export default function Home() {
+  const [selectedFilter, setSelectedFilter] = useState("All"); // State untuk menyimpan filter aktif
+
+  // Fungsi untuk memfilter daftar beasiswa berdasarkan kategori atau status
+  const filteredScholarships = scholarships.filter((scholarship) => {
+    if (selectedFilter === "All") return true;
+    if (selectedFilter === "Active") {
+      return (
+        getScholarshipStatus(
+          scholarship.tanggal_mulai,
+          scholarship.tanggal_akhir
+        ) === "Active"
+      );
+    }
+    if (selectedFilter === "Inactive") {
+      return (
+        getScholarshipStatus(
+          scholarship.tanggal_mulai,
+          scholarship.tanggal_akhir
+        ) === "Inactive"
+      );
+    }
+    return scholarship.kategori === selectedFilter;
+  });
+
   return (
     <div>
       <HeroSection />
@@ -18,76 +49,99 @@ export default function Home() {
               Filter by
             </h2>
             <ul className="space-y-4 text-lg">
-              <li className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("All")}
+              >
                 All
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Active")}
+              >
                 Active
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Inactive")}
+              >
                 Inactive
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pt-4 pb-2">
-                Academic
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pt-4 pb-2"
+                onClick={() => setSelectedFilter("Akademik")}
+              >
+                Akademik
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
-                Non Academic
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Non Akademik")}
+              >
+                Non Akademik
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2">
-                Bursary
+              <li
+                className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2"
+                onClick={() => setSelectedFilter("Bantuan")}
+              >
+                Bantuan
               </li>
             </ul>
           </div>
 
           {/* Cards Section */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {scholarships.slice(0, 6).map((scholarship) => (
-              <div
+            {filteredScholarships.slice(0, 6).map((scholarship) => (
+              <Link
                 key={scholarship.id}
-                className="border rounded-lg p-6 shadow-md hover:shadow-lg transition"
+                href={`/scholars/${scholarship.id}`} // Tautan ke halaman detail sesuai dengan ID beasiswa
+                passHref
               >
-                <h3 className="text-xl font-bold mb-2 text-black">
-                  {scholarship.title}
-                </h3>
-                <p className="text-black text-sm mb-4">
-                  {scholarship.startDate} - {scholarship.endDate}
-                </p>
-                <div className="flex items-center space-x-2 mb-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-sm ${
-                      getScholarshipStatus(
-                        scholarship.startDate,
-                        scholarship.endDate
-                      ) === "Active"
-                        ? "bg-green-200 text-green-700"
-                        : "bg-red-200 text-red-700"
-                    }`}
-                  >
-                    {getScholarshipStatus(
-                      scholarship.startDate,
-                      scholarship.endDate
-                    )}
-                  </span>
-                  {scholarship.tags.map((tag, index) => (
+                <div className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer">
+                  <h3 className="text-xl font-bold mb-2 text-black">
+                    {scholarship.nama_beasiswa}
+                  </h3>
+                  <p className="text-black text-sm mb-4">
+                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                    {formatCustomDate(scholarship.tanggal_akhir)}
+                  </p>
+                  <p className="text-black text-sm mb-4">
+                    {scholarship.deskripsi.split(".")[0]}.
+                  </p>
+                  <div className="flex items-center space-x-2 mb-4">
                     <span
-                      key={index}
-                      className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm"
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        getScholarshipStatus(
+                          scholarship.tanggal_mulai,
+                          scholarship.tanggal_akhir
+                        ) === "Active"
+                          ? "bg-green-200 text-green-700"
+                          : "bg-red-200 text-red-700"
+                      }`}
                     >
-                      {tag}
+                      {getScholarshipStatus(
+                        scholarship.tanggal_mulai,
+                        scholarship.tanggal_akhir
+                      )}
                     </span>
-                  ))}
+                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                      {scholarship.kategori}
+                    </span>
+                  </div>
+                  <button className="text-blue-600 font-semibold hover:underline">
+                    See Details
+                  </button>
                 </div>
-                <button className="text-blue-600 font-semibold hover:underline">
-                  See Details
-                </button>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
 
         {/* View More */}
         <div className="flex justify-end mt-8 mb-10 pr-16">
-          <button className="text-blue-600 font-semibold hover:underline">
+          <button
+            className="text-blue-600 font-semibold hover:underline"
+            onClick={() => (window.location.href = "/scholars")}
+          >
             View More &gt;
           </button>
         </div>

@@ -2,7 +2,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Footer from "../../components/footer";
-import { scholarships, parseCustomDate } from "../data/scholarshipdata"; // Import data and utility
+import Link from "next/link";
+import {
+  scholarships,
+  parseCustomDate,
+  getScholarshipStatus,
+  formatCustomDate,
+} from "../data/scholarshipdata"; // Import data and utility
 
 // Styled components
 const Container = styled.div`
@@ -77,10 +83,13 @@ export default function Home() {
   };
 
   // Function to determine if the scholarship is active
-  const isActiveScholarship = (startDate: string, endDate: string): boolean => {
+  const isActiveScholarship = (
+    tanggal_mulai: string,
+    tanggal_akhir: string
+  ): boolean => {
     const today = new Date();
-    const start = parseCustomDate(startDate);
-    const end = parseCustomDate(endDate);
+    const start = parseCustomDate(tanggal_mulai);
+    const end = parseCustomDate(tanggal_akhir);
     return today >= start && today <= end;
   };
 
@@ -89,10 +98,14 @@ export default function Home() {
     selectedFilter === "All"
       ? scholarships
       : selectedFilter === "Active"
-      ? scholarships.filter((s) => isActiveScholarship(s.startDate, s.endDate))
+      ? scholarships.filter((s) =>
+          isActiveScholarship(s.tanggal_mulai, s.tanggal_akhir)
+        )
       : selectedFilter === "Inactive"
-      ? scholarships.filter((s) => !isActiveScholarship(s.startDate, s.endDate))
-      : scholarships.filter((s) => s.tags.includes(selectedFilter));
+      ? scholarships.filter(
+          (s) => !isActiveScholarship(s.tanggal_mulai, s.tanggal_akhir)
+        )
+      : scholarships.filter((s) => s.kategori === selectedFilter);
 
   return (
     <div>
@@ -108,9 +121,10 @@ export default function Home() {
               "All",
               "Active",
               "Inactive",
-              "Academic",
-              "Non Academic",
-              "Bursary",
+              "Akademik",
+              "Non Akademik",
+              "Bantuan",
+              "Penelitian",
             ].map((filter) => (
               <Button
                 key={filter}
@@ -125,20 +139,47 @@ export default function Home() {
           {/* Cards Section */}
           <CardsContainer>
             {filteredScholarships.map((scholarship) => (
-              <Card key={scholarship.id}>
-                <h2 className="text-xl font-bold mb-2 text-black">
-                  {scholarship.title}
-                </h2>
-                <p className="text-black text-sm mb-4">
-                  {scholarship.startDate} - {scholarship.endDate}
-                </p>
-                <p className="text-gray-700 mb-4">
-                  {scholarship.tags.join(", ")}
-                </p>
-                <button className="text-blue-600 font-semibold hover:underline">
-                  Read More
-                </button>
-              </Card>
+              <Link
+                key={scholarship.id}
+                href={`/scholars/${scholarship.id}`} // Navigasi ke halaman detail berdasarkan ID
+                passHref
+              >
+                <Card className="cursor-pointer">
+                  <h2 className="text-xl font-bold mb-2 text-black">
+                    {scholarship.nama_beasiswa}
+                  </h2>
+                  <p className="text-black text-sm mb-4">
+                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                    {formatCustomDate(scholarship.tanggal_akhir)}
+                  </p>
+                  <p className="text-black text-sm mb-4">
+                    {scholarship.deskripsi.split(".")[0]}.
+                  </p>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        getScholarshipStatus(
+                          scholarship.tanggal_mulai,
+                          scholarship.tanggal_akhir
+                        ) === "Active"
+                          ? "bg-green-200 text-green-700"
+                          : "bg-red-200 text-red-700"
+                      }`}
+                    >
+                      {getScholarshipStatus(
+                        scholarship.tanggal_mulai,
+                        scholarship.tanggal_akhir
+                      )}
+                    </span>
+                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                      {scholarship.kategori}
+                    </span>
+                  </div>
+                  <button className="text-blue-600 font-semibold hover:underline">
+                    Read More
+                  </button>
+                </Card>
+              </Link>
             ))}
           </CardsContainer>
         </Container>
