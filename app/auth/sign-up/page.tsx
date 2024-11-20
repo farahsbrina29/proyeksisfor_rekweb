@@ -6,6 +6,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebaseConfig";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { doc, setDoc } from "firebase/firestore";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignUp() {
   const [fullName, setFullName] = useState("");
@@ -21,7 +23,10 @@ export default function SignUp() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!", {
+        position: "top-center",
+        autoClose: 3000,
+      });
       return;
     }
 
@@ -45,11 +50,21 @@ export default function SignUp() {
         createdAt: new Date(),
       });
 
-      alert("Account created successfully!");
-      router.push("/"); // Redirect ke halaman utama
+      toast.success("Account created successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+
+      // Redirect ke halaman utama setelah 3 detik
+      setTimeout(() => {
+        router.push("/");
+      }, 3000);
     } catch (err: any) {
       console.error("Error creating account:", err.message);
-      alert("Error creating account: " + err.message);
+      toast.error(`Error creating account: ${err.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setIsLoading(false); // Selesai loading
     }
@@ -60,6 +75,9 @@ export default function SignUp() {
       className="relative flex min-h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/assets/signup.jpg')" }}
     >
+      {/* Toast Notification */}
+      <ToastContainer />
+
       {/* Left Section */}
       <div className="flex-1 flex items-center justify-center bg-black bg-opacity-50">
         <h1 className="text-6xl font-bold text-white">Create Your Account!</h1>

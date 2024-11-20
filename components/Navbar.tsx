@@ -6,6 +6,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation"; // Import usePathname
 import { useRouter } from "next/navigation";
 import { FiUser, FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import Swal from "sweetalert2"; // Import SweetAlert2
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null); // State user
@@ -21,22 +24,44 @@ export default function Navbar() {
     return () => unsubscribe();
   }, []);
 
-  // Fungsi untuk logout
-  const handleSignOut = async () => {
-    if (confirm("Are you sure you want to sign out?")) {
-      try {
-        await signOut(auth);
-        alert("Successfully signed out!");
-        router.push("/");
-      } catch (error: any) {
-        console.error("Error signing out:", error.message);
-        alert("Error signing out: " + error.message);
+  // Fungsi untuk logout dengan SweetAlert2
+  const handleSignOut = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be signed out from your account.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, sign out!",
+      cancelButtonText: "Cancel",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await signOut(auth);
+          toast.success("You have successfully signed out.", {
+            position: "top-center",
+            autoClose: 3000,
+          });
+          setTimeout(() => {
+            router.push("/");
+          }, 3000); // Tunggu 3 detik sebelum redirect
+        } catch (error: any) {
+          console.error("Error signing out:", error.message);
+          toast.error(`Failed to sign out: ${error.message}`, {
+            position: "top-center",
+            autoClose: 3000,
+          });
+        }
       }
-    }
+    });
   };
 
   return (
     <nav className="bg-[#143F6B] text-white">
+      {/* Toast Notification */}
+      <ToastContainer />
+
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <div className="text-3xl font-bold">

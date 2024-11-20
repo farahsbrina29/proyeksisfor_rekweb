@@ -5,6 +5,10 @@ import { auth, db } from "@/lib/firebaseConfig";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { FiEdit, FiTrash2, FiSave, FiX } from "react-icons/fi";
+import { toast, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
+import "react-toastify/dist/ReactToastify.css";
+import "sweetalert2/dist/sweetalert2.min.css";
 
 export default function ProfilePage() {
   const [fullName, setFullName] = useState<string | null>(null);
@@ -19,7 +23,10 @@ export default function ProfilePage() {
     try {
       const user = auth.currentUser;
       if (!user) {
-        alert("No user logged in");
+        toast.warn("No user logged in!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
         router.push("/auth/sign-in");
         return;
       }
@@ -32,10 +39,16 @@ export default function ProfilePage() {
         setFullName(data.fullName);
         setEmail(data.email);
       } else {
-        console.error("No such document!");
+        toast.error("No such document found!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
       }
     } catch (error: any) {
-      console.error("Error fetching profile:", error.message);
+      toast.error(`Error fetching profile: ${error.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setIsLoading(false); // Selesai loading
     }
@@ -46,7 +59,10 @@ export default function ProfilePage() {
     try {
       const user = auth.currentUser;
       if (!user) {
-        alert("No user logged in");
+        toast.warn("No user logged in!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
         return;
       }
 
@@ -54,32 +70,58 @@ export default function ProfilePage() {
       await updateDoc(userDoc, { fullName: newFullName });
       setFullName(newFullName);
       setIsEditing(false);
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } catch (error: any) {
-      console.error("Error updating profile:", error.message);
+      toast.error(`Error updating profile: ${error.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setIsLoading(false); // Selesai loading
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete your account?")) return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Once deleted, your account cannot be recovered!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
 
     setIsLoading(true); // Mulai loading
     try {
       const user = auth.currentUser;
       if (!user) {
-        alert("No user logged in");
+        toast.warn("No user logged in!", {
+          position: "top-center",
+          autoClose: 3000,
+        });
         return;
       }
 
       const userDoc = doc(db, "users", user.uid);
       await deleteDoc(userDoc);
       await user.delete();
-      alert("Account deleted successfully!");
-      router.push("/auth/sign-in");
+      toast.success("Account deleted successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+      router.push("/");
     } catch (error: any) {
-      console.error("Error deleting account:", error.message);
+      toast.error(`Error deleting account: ${error.message}`, {
+        position: "top-center",
+        autoClose: 3000,
+      });
     } finally {
       setIsLoading(false); // Selesai loading
     }
@@ -91,6 +133,9 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      {/* Toast Notification */}
+      <ToastContainer />
+
       <div className="w-full max-w-md p-6 bg-white rounded-3xl shadow-lg border border-gray-300">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-700">
           Profile
