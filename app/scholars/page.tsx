@@ -135,7 +135,7 @@ export default function Home() {
               </Button>
             ))}
           </ButtonContainer>
-          
+
           {/* Cards Section */}
           <CardsContainer>
             {filteredScholarships.map((scholarship) => (
@@ -153,7 +153,7 @@ export default function Home() {
                     {formatCustomDate(scholarship.tanggal_akhir)}
                   </p>
                   <p className="text-black text-sm mb-4">
-                    {scholarship.deskripsi}
+                    {scholarship.deskripsi.split(".")[0]}.
                   </p>
                   <div className="flex items-center space-x-2 mb-4">
                     <span
@@ -182,7 +182,6 @@ export default function Home() {
               </Link>
             ))}
           </CardsContainer>
-
         </Container>
       </div>
       <Footer />

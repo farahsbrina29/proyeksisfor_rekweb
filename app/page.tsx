@@ -61,9 +61,9 @@ export default function Home() {
                     {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
                     {formatCustomDate(scholarship.tanggal_akhir)}
                   </p>
-                  <p className="text-black text-sm mb-4">
-                    {scholarship.deskripsi}
-                  </p>
+                    <p className="text-black text-sm mb-4">
+                    {scholarship.deskripsi.split(".")[0]}.
+                    </p>
                   <div className="flex items-center space-x-2 mb-4">
                     <span
                       className={`px-2 py-1 rounded-full text-sm ${
