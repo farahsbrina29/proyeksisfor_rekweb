@@ -1,44 +1,15 @@
 import HeroSection from "../components/heroSection";
 import Footer from "../components/footer";
-// Import data scholarships
-const scholarships = [
-  {
-    id: 1,
-    title: "Telkom University S1 Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    tags: ["Active", "Academic"],
-  },
-  {
-    id: 2,
-    title: "Telkom University S1 Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    tags: ["Active", "Academic"],
-  },
-  {
-    id: 3,
-    title: "Telkom University S1 Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    tags: ["Active", "Academic"],
-  },
-  {
-    id: 4,
-    title: "Telkom University S1 Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    tags: ["Active", "Academic"],
-  },
-  {
-    id: 5,
-    title: "Telkom University S1 Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    tags: ["Active", "Academic"],
-  },
-  {
-    id: 6,
-    title: "Telkom University S1 Scholarship",
-    date: "20 November 2024 - 12 Desember 2024",
-    tags: ["Active", "Academic"],
-  },
-];
+import { scholarships, parseCustomDate } from "../app/data/scholarshipdata";
+
+// Function to determine if the scholarship is Active or Inactive
+function getScholarshipStatus(startDate: string, endDate: string): string {
+  const today = new Date();
+  const start = parseCustomDate(startDate);
+  const end = parseCustomDate(endDate);
+
+  return today >= start && today <= end ? "Active" : "Inactive";
+}
 
 export default function Home() {
   return (
@@ -61,7 +32,7 @@ export default function Home() {
               <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
                 Active
               </li>
-              <li className="cursor-pointer hover:text-blue-600 text-black border-b border-gray-300 pb-2">
+              <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pb-2">
                 Inactive
               </li>
               <li className="cursor-pointer hover:text-blue-600 text-black border-gray-300 pt-4 pb-2">
@@ -78,7 +49,7 @@ export default function Home() {
 
           {/* Cards Section */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {scholarships.map((scholarship) => (
+            {scholarships.slice(0, 6).map((scholarship) => (
               <div
                 key={scholarship.id}
                 className="border rounded-lg p-6 shadow-md hover:shadow-lg transition"
@@ -86,8 +57,25 @@ export default function Home() {
                 <h3 className="text-xl font-bold mb-2 text-black">
                   {scholarship.title}
                 </h3>
-                <p className="text-black text-sm mb-4">{scholarship.date}</p>
+                <p className="text-black text-sm mb-4">
+                  {scholarship.startDate} - {scholarship.endDate}
+                </p>
                 <div className="flex items-center space-x-2 mb-4">
+                  <span
+                    className={`px-2 py-1 rounded-full text-sm ${
+                      getScholarshipStatus(
+                        scholarship.startDate,
+                        scholarship.endDate
+                      ) === "Active"
+                        ? "bg-green-200 text-green-700"
+                        : "bg-red-200 text-red-700"
+                    }`}
+                  >
+                    {getScholarshipStatus(
+                      scholarship.startDate,
+                      scholarship.endDate
+                    )}
+                  </span>
                   {scholarship.tags.map((tag, index) => (
                     <span
                       key={index}
