@@ -1,14 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Footer from "../../components/footer";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { auth } from "@/lib/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 import {
   scholarships,
   parseCustomDate,
   getScholarshipStatus,
   formatCustomDate,
-} from "../data/scholarshipdata"; // Import data and utility
+} from "../data/scholarshipdata";
 
 // Styled components
 const Container = styled.div`
@@ -76,6 +80,33 @@ const Card = styled.div`
 
 export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState("All");
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State untuk status login pengguna
+
+  // Cek status autentikasi pengguna menggunakan Firebase
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setIsLoggedIn(!!currentUser); // Update status login
+    });
+    return () => unsubscribe(); // Cleanup listener
+  }, []);
+
+  // Fungsi untuk handle klik pada card
+  const handleCardClick = (id: string) => {
+    if (isLoggedIn) {
+      // Jika pengguna sudah login, arahkan ke halaman detail
+      window.location.href = `/scholars/${id}`;
+    } else {
+      // Jika belum login, tampilkan toast pemberitahuan
+      toast.error("Please sign in to view the scholarship details.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  };
 
   // Function to handle button click for filtering
   const handleFilterClick = (filter: string) => {
@@ -139,10 +170,9 @@ export default function Home() {
           {/* Cards Section */}
           <CardsContainer>
             {filteredScholarships.map((scholarship) => (
-              <Link
+              <div
                 key={scholarship.id}
-                href={`/scholars/${scholarship.id}`} // Navigasi ke halaman detail berdasarkan ID
-                passHref
+                onClick={() => handleCardClick(scholarship.id)}
               >
                 <Card className="cursor-pointer">
                   <h2 className="text-xl font-bold mb-2 text-black">
@@ -179,7 +209,7 @@ export default function Home() {
                     Read More
                   </button>
                 </Card>
-              </Link>
+              </div>
             ))}
           </CardsContainer>
         </Container>

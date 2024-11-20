@@ -19,9 +19,10 @@ export default function Navbar() {
   // Cek status autentikasi
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Update user
+      setUser(currentUser); // Update state user
     });
-    return () => unsubscribe();
+
+    return () => unsubscribe(); // Cleanup listener saat komponen dilepas
   }, []);
 
   // Fungsi untuk logout dengan SweetAlert2
