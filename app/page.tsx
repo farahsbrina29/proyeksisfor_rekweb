@@ -1,5 +1,8 @@
+"use client";
+
 import HeroSection from "../components/heroSection";
 import Footer from "../components/footer";
+import Link from "next/link";
 import {
   scholarships,
   getScholarshipStatus,
@@ -45,51 +48,57 @@ export default function Home() {
           {/* Cards Section */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
             {scholarships.slice(0, 6).map((scholarship) => (
-              <div
+              <Link
                 key={scholarship.id}
-                className="border rounded-lg p-6 shadow-md hover:shadow-lg transition"
+                href={`/scholars/${scholarship.id}`} // Tautan ke halaman detail sesuai dengan ID beasiswa
+                passHref
               >
-                <h3 className="text-xl font-bold mb-2 text-black">
-                  {scholarship.nama_beasiswa}
-                </h3>
-                <p className="text-black text-sm mb-4">
-                  {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
-                  {formatCustomDate(scholarship.tanggal_akhir)}
-                </p>
-                <p className="text-black text-sm mb-4">
-                  {scholarship.deskripsi}
-                </p>
-                <div className="flex items-center space-x-2 mb-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-sm ${
-                      getScholarshipStatus(
+                <div className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer">
+                  <h3 className="text-xl font-bold mb-2 text-black">
+                    {scholarship.nama_beasiswa}
+                  </h3>
+                  <p className="text-black text-sm mb-4">
+                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                    {formatCustomDate(scholarship.tanggal_akhir)}
+                  </p>
+                  <p className="text-black text-sm mb-4">
+                    {scholarship.deskripsi}
+                  </p>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        getScholarshipStatus(
+                          scholarship.tanggal_mulai,
+                          scholarship.tanggal_akhir
+                        ) === "Active"
+                          ? "bg-green-200 text-green-700"
+                          : "bg-red-200 text-red-700"
+                      }`}
+                    >
+                      {getScholarshipStatus(
                         scholarship.tanggal_mulai,
                         scholarship.tanggal_akhir
-                      ) === "Active"
-                        ? "bg-green-200 text-green-700"
-                        : "bg-red-200 text-red-700"
-                    }`}
-                  >
-                    {getScholarshipStatus(
-                      scholarship.tanggal_mulai,
-                      scholarship.tanggal_akhir
-                    )}
-                  </span>
-                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                    {scholarship.kategori}
-                  </span>
+                      )}
+                    </span>
+                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                      {scholarship.kategori}
+                    </span>
+                  </div>
+                  <button className="text-blue-600 font-semibold hover:underline">
+                    See Details
+                  </button>
                 </div>
-                <button className="text-blue-600 font-semibold hover:underline">
-                  See Details
-                </button>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
 
         {/* View More */}
         <div className="flex justify-end mt-8 mb-10 pr-16">
-          <button className="text-blue-600 font-semibold hover:underline">
+          <button
+            className="text-blue-600 font-semibold hover:underline"
+            onClick={() => (window.location.href = "/scholars")}
+          >
             View More &gt;
           </button>
         </div>

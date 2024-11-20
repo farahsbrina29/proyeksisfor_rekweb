@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Footer from "../../components/footer";
+import Link from "next/link";
 import {
   scholarships,
   parseCustomDate,
@@ -134,47 +135,54 @@ export default function Home() {
               </Button>
             ))}
           </ButtonContainer>
-
+          
           {/* Cards Section */}
           <CardsContainer>
             {filteredScholarships.map((scholarship) => (
-              <Card key={scholarship.id}>
-                <h2 className="text-xl font-bold mb-2 text-black">
-                  {scholarship.nama_beasiswa}
-                </h2>
-                <p className="text-black text-sm mb-4">
-                  {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
-                  {formatCustomDate(scholarship.tanggal_akhir)}
-                </p>
-                <p className="text-black text-sm mb-4">
-                  {scholarship.deskripsi}
-                </p>
-                <div className="flex items-center space-x-2 mb-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-sm ${
-                      getScholarshipStatus(
+              <Link
+                key={scholarship.id}
+                href={`/scholars/${scholarship.id}`} // Navigasi ke halaman detail berdasarkan ID
+                passHref
+              >
+                <Card className="cursor-pointer">
+                  <h2 className="text-xl font-bold mb-2 text-black">
+                    {scholarship.nama_beasiswa}
+                  </h2>
+                  <p className="text-black text-sm mb-4">
+                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                    {formatCustomDate(scholarship.tanggal_akhir)}
+                  </p>
+                  <p className="text-black text-sm mb-4">
+                    {scholarship.deskripsi}
+                  </p>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        getScholarshipStatus(
+                          scholarship.tanggal_mulai,
+                          scholarship.tanggal_akhir
+                        ) === "Active"
+                          ? "bg-green-200 text-green-700"
+                          : "bg-red-200 text-red-700"
+                      }`}
+                    >
+                      {getScholarshipStatus(
                         scholarship.tanggal_mulai,
                         scholarship.tanggal_akhir
-                      ) === "Active"
-                        ? "bg-green-200 text-green-700"
-                        : "bg-red-200 text-red-700"
-                    }`}
-                  >
-                    {getScholarshipStatus(
-                      scholarship.tanggal_mulai,
-                      scholarship.tanggal_akhir
-                    )}
-                  </span>
-                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                    {scholarship.kategori}
-                  </span>
-                </div>
-                <button className="text-blue-600 font-semibold hover:underline">
-                  Read More
-                </button>
-              </Card>
+                      )}
+                    </span>
+                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                      {scholarship.kategori}
+                    </span>
+                  </div>
+                  <button className="text-blue-600 font-semibold hover:underline">
+                    Read More
+                  </button>
+                </Card>
+              </Link>
             ))}
           </CardsContainer>
+
         </Container>
       </div>
       <Footer />
