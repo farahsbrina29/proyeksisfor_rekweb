@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
@@ -26,6 +29,20 @@ export default function SignIn() {
       alert("Error signing in: " + err.message);
     } finally {
       setIsLoading(false); // Selesai loading
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      alert("Please enter your email to reset the password.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent! Please check your email inbox.");
+    } catch (err: any) {
+      console.error("Error resetting password:", err.message);
+      alert("Error resetting password: " + err.message);
     }
   };
 
@@ -88,20 +105,29 @@ export default function SignIn() {
           </div>
 
           {/* Remember Me */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              className="h-4 w-4 text-blue focus:ring-blue-500 border-gray-300 rounded"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            <label
-              htmlFor="rememberMe"
-              className="ml-2 block text-sm text-white"
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                className="h-4 w-4 text-blue focus:ring-blue-500 border-gray-300 rounded"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <label
+                htmlFor="rememberMe"
+                className="ml-2 block text-sm text-white"
+              >
+                Remember me
+              </label>
+            </div>
+            <button
+              type="button"
+              className="text-sm text-blue-400 hover:underline"
+              onClick={handleForgotPassword}
             >
-              Remember me
-            </label>
+              Forgot Password?
+            </button>
           </div>
 
           {/* Submit Button */}
