@@ -1,6 +1,9 @@
 "use client";
 
 import { use } from "react"; // Import React Hook
+import { useRouter } from "next/navigation"; // Import useRouter dari Next.js
+import { toast, ToastContainer } from "react-toastify"; // Import react-toastify
+import "react-toastify/dist/ReactToastify.css"; // Import CSS untuk toast messages
 import {
   scholarships,
   getScholarshipStatus,
@@ -13,6 +16,7 @@ export default function ScholarDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params); // Gunakan React.use() untuk membaca params
+  const router = useRouter(); // Inisialisasi useRouter untuk navigasi
 
   const scholarship = scholarships.find((s) => s.documentid === id);
 
@@ -24,8 +28,29 @@ export default function ScholarDetail({
     );
   }
 
+  const isScholarshipActive =
+    getScholarshipStatus(
+      scholarship.tanggal_mulai,
+      scholarship.tanggal_akhir
+    ) === "Active";
+
+  const handleButtonClick = () => {
+    if (!isScholarshipActive) {
+      toast.error("The scholarship application is already closed.", {
+        position: "top-center",
+        autoClose: 3000,
+      });
+    } else {
+      // Navigasi ke halaman register dengan ID beasiswa
+      router.push(`/scholars/${id}/register`);
+    }
+  };
+
   return (
     <div className="bg-white py-8 px-8 max-w-4xl mx-auto shadow-lg rounded-lg border border-gray-200">
+      {/* Toast Container */}
+      <ToastContainer />
+
       {/* Header */}
       <h1 className="text-4xl font-bold text-gray-900 mb-4">
         {scholarship.nama_beasiswa}
@@ -38,10 +63,7 @@ export default function ScholarDetail({
       <div className="flex items-center space-x-2 mb-4">
         <span
           className={`px-4 py-2 rounded-full text-lg ${
-            getScholarshipStatus(
-              scholarship.tanggal_mulai,
-              scholarship.tanggal_akhir
-            ) === "Active"
+            isScholarshipActive
               ? "bg-green-200 text-green-700"
               : "bg-red-200 text-red-700"
           }`}
@@ -91,10 +113,15 @@ export default function ScholarDetail({
 
       {/* Register Button */}
       <button
-        className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition duration-200"
-        onClick={() => alert("Registration functionality not implemented yet!")}
+        className={`w-full py-3 rounded-lg text-lg font-semibold transition duration-200 ${
+          isScholarshipActive
+            ? "bg-blue-600 text-white hover:bg-blue-700"
+            : "bg-gray-400 text-gray-700 cursor-not-allowed"
+        }`}
+        onClick={handleButtonClick}
+        disabled={!isScholarshipActive} // Nonaktifkan tombol jika tidak aktif
       >
-        Register Now
+        {isScholarshipActive ? "Register Now" : "Closed"}
       </button>
     </div>
   );
