@@ -14,7 +14,7 @@ export default function ScholarDetail({
 }) {
   const { id } = use(params); // Gunakan React.use() untuk membaca params
 
-  const scholarship = scholarships.find((s) => s.id === id);
+  const scholarship = scholarships.find((s) => s.documentid === id);
 
   if (!scholarship) {
     return (

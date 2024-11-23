@@ -40,7 +40,7 @@ export function getScholarshipStatus(tanggal_mulai: string, tanggal_akhir: strin
 // Scholarship data
 export const scholarships = [
   {
-    id: "001",
+    documentid: "001",
     nama_beasiswa: "Beasiswa Unggulan",
     deskripsi:
       "Beasiswa Unggulan adalah program yang dirancang untuk mendukung mahasiswa berprestasi yang memiliki IPK tinggi dan aktif dalam kegiatan organisasi. Tujuannya adalah untuk membantu mahasiswa berbakat mencapai potensi terbaik mereka dengan memberikan dukungan finansial dan akses ke berbagai sumber daya pendidikan.",
@@ -57,7 +57,7 @@ export const scholarships = [
     kontak: "beasiswa@example.com",
   },
   {
-    id: "002",
+    documentid: "002",
     nama_beasiswa: "Beasiswa Prestasi Telkom University",
     deskripsi:
       "Beasiswa ini disediakan oleh Telkom University untuk mendukung mahasiswa yang memiliki pencapaian akademik tinggi. Dengan fokus pada nilai rata-rata semester terakhir, beasiswa ini bertujuan memotivasi mahasiswa agar terus meningkatkan kualitas belajar mereka.",
@@ -74,7 +74,7 @@ export const scholarships = [
     kontak: "prestasi@telkomuniversity.ac.id",
   },
   {
-    id: "003",
+    documentid: "003",
     nama_beasiswa: "Bantuan Pendidikan Pemerintah",
     deskripsi:
       "Bantuan pendidikan untuk siswa dari keluarga kurang mampu, bertujuan untuk memberikan akses pendidikan yang setara bagi semua individu.",
@@ -91,7 +91,7 @@ export const scholarships = [
     kontak: "bantuan@pemerintah.go.id",
   },
   {
-    id: "004",
+    documentid: "004",
     nama_beasiswa: "Beasiswa Penelitian Sains",
     deskripsi:
       "Beasiswa ini ditujukan untuk mahasiswa yang terlibat dalam penelitian di bidang sains dan memiliki proyek penelitian yang inovatif.",
@@ -108,7 +108,7 @@ export const scholarships = [
     kontak: "penelitian@sains.com",
   },
   {
-    id: "005",
+    documentid: "005",
     nama_beasiswa: "Beasiswa Atlet Berprestasi",
     deskripsi:
       "Beasiswa ini diberikan kepada mahasiswa yang aktif dalam bidang olahraga dan telah menunjukkan prestasi di tingkat lokal, nasional, atau internasional.",
@@ -125,7 +125,7 @@ export const scholarships = [
     kontak: "olahraga@example.com",
   },
   {
-    id: "006",
+    documentid: "006",
     nama_beasiswa: "Beasiswa Seni dan Budaya",
     deskripsi:
       "Beasiswa Seni dan Budaya ditujukan untuk mahasiswa yang memiliki bakat luar biasa di bidang seni dan budaya. Tujuannya adalah untuk melestarikan dan mengembangkan seni serta budaya melalui karya-karya kreatif mahasiswa.",
@@ -142,7 +142,7 @@ export const scholarships = [
     kontak: "seni@budaya.com",
   },
   {
-    id: "007",
+    documentid: "007",
     nama_beasiswa: "Beasiswa Kepemimpinan",
     deskripsi:
       "Beasiswa ini ditujukan untuk mahasiswa dengan kemampuan kepemimpinan luar biasa. Program ini bertujuan untuk mencetak pemimpin masa depan yang kompeten dan berintegritas.",
@@ -159,7 +159,7 @@ export const scholarships = [
     kontak: "kepemimpinan@beasiswa.com",
   },
   {
-    id: "008",
+    documentid: "008",
     nama_beasiswa: "Hibah Inovasi Teknik",
     deskripsi:
       "Hibah Inovasi Teknik merupakan program penghargaan bagi mahasiswa teknik yang menciptakan inovasi luar biasa dengan potensi implementasi nyata. Hibah ini bertujuan untuk mendorong mahasiswa dalam pengembangan teknologi dan solusi inovatif.",
@@ -176,7 +176,7 @@ export const scholarships = [
     kontak: "inovasi@teknik.com",
   },
   {
-    id: "009",
+    documentid: "009",
     nama_beasiswa: "Beasiswa Profesi Kesehatan",
     deskripsi:
       "Beasiswa ini ditujukan untuk mahasiswa yang sedang menempuh pendidikan di bidang kesehatan. Program ini bertujuan untuk mendukung tenaga kesehatan masa depan dalam menyelesaikan studi mereka.",
@@ -193,7 +193,7 @@ export const scholarships = [
     kontak: "kesehatan@beasiswa.com",
   },
   {
-    id: "010",
+    documentid: "010",
     nama_beasiswa: "Penghargaan Kewirausahaan",
     deskripsi:
       "Penghargaan ini diberikan kepada mahasiswa yang memiliki ide bisnis inovatif. Program ini bertujuan untuk mendukung semangat kewirausahaan mahasiswa dan mendorong terciptanya ide-ide kreatif dalam dunia bisnis.",

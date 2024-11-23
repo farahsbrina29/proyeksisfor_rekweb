@@ -171,8 +171,8 @@ export default function Home() {
           <CardsContainer>
             {filteredScholarships.map((scholarship) => (
               <div
-                key={scholarship.id}
-                onClick={() => handleCardClick(scholarship.id)}
+                key={scholarship.documentid}
+                onClick={() => handleCardClick(scholarship.documentid)}
               >
                 <Card className="cursor-pointer">
                   <h2 className="text-xl font-bold mb-2 text-black">

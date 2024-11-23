@@ -136,9 +136,9 @@ export default function Home() {
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredScholarships.slice(0, 6).map((scholarship) => (
               <div
-                key={scholarship.id}
+                key={scholarship.documentid}
                 className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer"
-                onClick={() => handleCardClick(scholarship.id)} // Panggil fungsi handleCardClick saat kartu diklik
+                onClick={() => handleCardClick(scholarship.documentid)} // Panggil fungsi handleCardClick saat kartu diklik
               >
                 <h3 className="text-xl font-bold mb-2 text-black">
                   {scholarship.nama_beasiswa}
