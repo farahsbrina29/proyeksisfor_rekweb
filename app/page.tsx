@@ -7,12 +7,11 @@ import {
   scholarships,
   getScholarshipStatus,
   formatCustomDate,
-} from "../app/data/scholarshipdata";
+} from "../data/scholarshipdata";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-
 
 export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState<string>("All"); // State untuk menyimpan filter aktif

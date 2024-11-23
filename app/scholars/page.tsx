@@ -12,7 +12,7 @@ import {
   parseCustomDate,
   getScholarshipStatus,
   formatCustomDate,
-} from "../data/scholarshipdata";
+} from "../../data/scholarshipdata";
 
 // Styled components
 const Container = styled.div`

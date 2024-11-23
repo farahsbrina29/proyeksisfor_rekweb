@@ -5,7 +5,7 @@ import {
   scholarships,
   getScholarshipStatus,
   formatCustomDate,
-} from "../../data/scholarshipdata"; // Import data beasiswa
+} from "../../../data/scholarshipdata"; // Import data beasiswa
 
 export default function ScholarDetail({
   params,
