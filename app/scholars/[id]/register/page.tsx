@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Firebase Auth
-import { doc, getDoc, getFirestore } from "firebase/firestore"; // Firebase Firestore
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Head from "next/head";
@@ -13,7 +13,7 @@ type FormData = {
   email: string;
   program_studi: string;
   semester: string;
-  alasan?: string; // Opsional
+  alasan?: string;
   dokumen: File | null;
 };
 
@@ -37,12 +37,10 @@ export default function ScholarshipRegistrationForm({
   const db = getFirestore();
 
   useEffect(() => {
-    // Ambil data dari Firestore berdasarkan uid pengguna
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // Ambil data pengguna dari Firestore
           const userDocRef = doc(db, "users", user.uid);
           const userSnapshot = await getDoc(userDocRef);
 
@@ -50,8 +48,8 @@ export default function ScholarshipRegistrationForm({
             const userData = userSnapshot.data();
             setFormData((prevData) => ({
               ...prevData,
-              nama: userData.fullName || "", // Isi otomatis nama dari Firestore
-              email: userData.email || "", // Isi otomatis email dari Firestore
+              nama: userData.fullName || "",
+              email: userData.email || "",
             }));
           } else {
             console.warn("No user document found in Firestore.");
@@ -66,11 +64,8 @@ export default function ScholarshipRegistrationForm({
   }, [db]);
 
   useEffect(() => {
-    // Tunggu params selesai di-unwrap
     (async () => {
       const { id } = await params;
-
-      // Judul halaman diisi sesuai ID (misalnya dari data lokal atau API)
       setScholarshipTitle(`Scholarship ${id}`);
     })();
   }, [params]);
@@ -86,10 +81,7 @@ export default function ScholarshipRegistrationForm({
     const file = e.target.files?.[0] || null;
 
     if (file && file.size > 2 * 1024 * 1024) {
-      toast.error("The uploaded file size exceeds 2 MB.", {
-        position: "top-center",
-        autoClose: 3000,
-      });
+      toast.error("File size exceeds 2 MB.", { position: "top-center" });
       return;
     }
 
@@ -109,43 +101,35 @@ export default function ScholarshipRegistrationForm({
     ) {
       toast.error("Please fill in all required fields.", {
         position: "top-center",
-        autoClose: 3000,
       });
       return;
     }
 
-    console.log("Form Data:", formData);
-
     toast.success(
       "Registration submitted successfully. Please wait for confirmation.",
-      {
-        position: "top-center",
-        autoClose: 2000,
-      }
+      { position: "top-center" }
     );
 
-    // Wait for 3 seconds before navigating
     setTimeout(() => {
       window.location.href = `/status`;
     }, 3000);
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+    <div className="w-full max-w-7xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10">
       <Head>
         <title>{scholarshipTitle} - Registration</title>
       </Head>
       <ToastContainer />
-      <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
+      <h1 className="text-4xl font-bold text-left text-black-700 mb-8">
         Register for {scholarshipTitle}
       </h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <p className="mb-4 text-gray-500">Fields marked with an * are required</p>
+      
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
         {/* Nama */}
         <div>
-          <label
-            htmlFor="nama"
-            className="block font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="nama" className="block text-lg font-semibold mb-2">
             Full Name
           </label>
           <input
@@ -154,14 +138,14 @@ export default function ScholarshipRegistrationForm({
             name="nama"
             value={formData.nama}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-blue-300 focus:ring focus:outline-none"
             readOnly
           />
         </div>
 
         {/* NIM */}
         <div>
-          <label htmlFor="nim" className="block font-medium text-gray-700 mb-1">
+          <label htmlFor="nim" className="block text-lg font-semibold mb-2">
             Student ID (NIM)
           </label>
           <input
@@ -170,17 +154,14 @@ export default function ScholarshipRegistrationForm({
             name="nim"
             value={formData.nim}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-blue-300 focus:ring focus:outline-none"
             required
           />
         </div>
 
         {/* Email */}
         <div>
-          <label
-            htmlFor="email"
-            className="block font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="email" className="block text-lg font-semibold mb-2">
             Email
           </label>
           <input
@@ -189,7 +170,7 @@ export default function ScholarshipRegistrationForm({
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-blue-300 focus:ring focus:outline-none"
             readOnly
           />
         </div>
@@ -198,7 +179,7 @@ export default function ScholarshipRegistrationForm({
         <div>
           <label
             htmlFor="program_studi"
-            className="block font-medium text-gray-700 mb-1"
+            className="block text-lg font-semibold mb-2"
           >
             Program Studi
           </label>
@@ -208,7 +189,7 @@ export default function ScholarshipRegistrationForm({
             name="program_studi"
             value={formData.program_studi}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-blue-300 focus:ring focus:outline-none"
             placeholder="Enter your program of study"
             required
           />
@@ -216,10 +197,7 @@ export default function ScholarshipRegistrationForm({
 
         {/* Semester */}
         <div>
-          <label
-            htmlFor="semester"
-            className="block font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="semester" className="block text-lg font-semibold mb-2">
             Semester
           </label>
           <input
@@ -228,7 +206,7 @@ export default function ScholarshipRegistrationForm({
             name="semester"
             value={formData.semester}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-blue-300 focus:ring focus:outline-none"
             min={1}
             max={14}
             required
@@ -237,28 +215,22 @@ export default function ScholarshipRegistrationForm({
 
         {/* Alasan */}
         <div>
-          <label
-            htmlFor="alasan"
-            className="block font-medium text-gray-700 mb-1"
-          >
-            Reason for Applying (Optional)
+          <label htmlFor="alasan" className="block text-lg font-semibold mb-2">
+            Reason for Applying
           </label>
           <textarea
             id="alasan"
             name="alasan"
             value={formData.alasan}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-blue-300 focus:ring focus:outline-none"
             rows={4}
           ></textarea>
         </div>
 
         {/* Dokumen */}
         <div>
-          <label
-            htmlFor="dokumen"
-            className="block font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="dokumen" className="block text-lg font-semibold mb-2">
             Upload Supporting Documents
           </label>
           <input
@@ -266,16 +238,16 @@ export default function ScholarshipRegistrationForm({
             id="dokumen"
             name="dokumen"
             onChange={handleFileChange}
-            className="w-full"
+            className="w-full px-4 py-2"
             required
           />
-          <p className="text-sm text-gray-500">Max file size: 2 MB.</p>
+          <p className="text-sm text-gray-500 mt-1">Max file size: 2 MB.</p>
         </div>
 
         {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-bold"
         >
           Submit
         </button>
