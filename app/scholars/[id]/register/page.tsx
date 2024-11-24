@@ -130,7 +130,7 @@ export default function ScholarshipRegistrationForm({
         {/* Nama */}
         <div>
           <label htmlFor="nama" className="block text-lg font-semibold mb-2">
-            Full Name
+            Full Name*
           </label>
           <input
             type="text"
@@ -146,7 +146,7 @@ export default function ScholarshipRegistrationForm({
         {/* NIM */}
         <div>
           <label htmlFor="nim" className="block text-lg font-semibold mb-2">
-            Student ID (NIM)
+            Student ID (NIM)*
           </label>
           <input
             type="text"
@@ -162,7 +162,7 @@ export default function ScholarshipRegistrationForm({
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-lg font-semibold mb-2">
-            Email
+            Email*
           </label>
           <input
             type="email"
@@ -181,7 +181,7 @@ export default function ScholarshipRegistrationForm({
             htmlFor="program_studi"
             className="block text-lg font-semibold mb-2"
           >
-            Program Studi
+            Study Program*
           </label>
           <input
             type="text"
@@ -198,7 +198,7 @@ export default function ScholarshipRegistrationForm({
         {/* Semester */}
         <div>
           <label htmlFor="semester" className="block text-lg font-semibold mb-2">
-            Semester
+            Semester*
           </label>
           <input
             type="number"
@@ -231,7 +231,7 @@ export default function ScholarshipRegistrationForm({
         {/* Dokumen */}
         <div>
           <label htmlFor="dokumen" className="block text-lg font-semibold mb-2">
-            Upload Supporting Documents
+            Upload Supporting Documents*
           </label>
           <input
             type="file"

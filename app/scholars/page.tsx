@@ -56,7 +56,8 @@ const Card = styled.div`
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   padding: 20px;
-  width: 95%;
+  width: 100%; /* Make the card take full width */
+  max-width: 2000px; /* Optionally limit the maximum width */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
 
