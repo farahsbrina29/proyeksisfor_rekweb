@@ -1,17 +1,18 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Footer from "../../components/footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { auth } from "@/lib/firebaseConfig";
+import { auth, db } from "@/lib/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
-  scholarships,
   parseCustomDate,
   getScholarshipStatus,
   formatCustomDate,
-} from "../../data/scholarshipdata";
+} from "../../data/scholarshipdatautility";
 
 // Styled components
 const Container = styled.div`
@@ -56,8 +57,8 @@ const Card = styled.div`
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   padding: 20px;
-  width: 100%; /* Make the card take full width */
-  max-width: 2000px; /* Optionally limit the maximum width */
+  width: 100%;
+  max-width: 2000px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
 
@@ -67,10 +68,12 @@ const Card = styled.div`
 `;
 
 export default function Home() {
+  const [scholarships, setScholarships] = useState<any[]>([]);
   const [selectedAll, setSelectedAll] = useState("All");
   const [selectedMasaAktif, setSelectedMasaAktif] = useState("");
   const [selectedJenis, setSelectedJenis] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Cek status autentikasi pengguna menggunakan Firebase
   useEffect(() => {
@@ -78,6 +81,27 @@ export default function Home() {
       setIsLoggedIn(!!currentUser);
     });
     return () => unsubscribe();
+  }, []);
+
+  // Ambil data beasiswa dari Firestore
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        const scholarshipRef = collection(db, "scholarship");
+        const querySnapshot = await getDocs(scholarshipRef);
+        const data = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setScholarships(data);
+      } catch (error) {
+        console.error("Error fetching scholarships:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchScholarships();
   }, []);
 
   // Fungsi untuk handle klik pada card
@@ -110,23 +134,32 @@ export default function Home() {
   const willEndSoonScholarship = (tanggal_akhir: string): boolean => {
     const today = new Date();
     const end = parseCustomDate(tanggal_akhir);
-    return end > today && (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 30;
+    return (
+      end > today &&
+      (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 30
+    );
   };
 
   // Filter scholarships based on dropdown selections
-  const filteredScholarships = scholarships.filter((scholarship) => {
-    const isAll = selectedAll === "All";
-    const isMasaAktifValid =
-      selectedMasaAktif === "" ||
-      (selectedMasaAktif === "Sedang Berlangsung" &&
-        isActiveScholarship(scholarship.tanggal_mulai, scholarship.tanggal_akhir)) ||
-      (selectedMasaAktif === "Akan Berakhir" &&
-        willEndSoonScholarship(scholarship.tanggal_akhir));
-    const isJenisValid =
-      selectedJenis === "" || scholarship.kategori === selectedJenis;
+  const filteredScholarships =
+    scholarships.length > 0
+      ? scholarships.filter((scholarship) => {
+          const isAll = selectedAll === "All";
+          const isMasaAktifValid =
+            selectedMasaAktif === "" ||
+            (selectedMasaAktif === "Sedang Berlangsung" &&
+              getScholarshipStatus(
+                scholarship.tanggal_mulai,
+                scholarship.tanggal_akhir
+              ) === "Active") ||
+            (selectedMasaAktif === "Akan Berakhir" &&
+              willEndSoonScholarship(scholarship.tanggal_akhir));
+          const isJenisValid =
+            selectedJenis === "" || scholarship.kategori === selectedJenis;
 
-    return isAll && isMasaAktifValid && isJenisValid;
-  });
+          return isAll && isMasaAktifValid && isJenisValid;
+        })
+      : [];
 
   return (
     <div>
@@ -167,50 +200,54 @@ export default function Home() {
           </DropdownContainer>
 
           {/* Cards Section */}
-          <CardsContainer>
-            {filteredScholarships.map((scholarship) => (
-              <div
-                key={scholarship.documentid}
-                onClick={() => handleCardClick(scholarship.documentid)}
-              >
-                <Card className="cursor-pointer">
-                  <h2 className="text-xl font-bold mb-2 text-black">
-                    {scholarship.nama_beasiswa}
-                  </h2>
-                  <p className="text-black text-sm mb-4">
-                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
-                    {formatCustomDate(scholarship.tanggal_akhir)}
-                  </p>
-                  <p className="text-black text-sm mb-4">
-                    {scholarship.deskripsi.split(".")[0]}.
-                  </p>
-                  <div className="flex items-center space-x-2 mb-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-sm ${
-                        getScholarshipStatus(
+          {isLoading ? (
+            <div className="text-center mt-10">Loading scholarships...</div>
+          ) : (
+            <CardsContainer>
+              {filteredScholarships.map((scholarship) => (
+                <div
+                  key={scholarship.id}
+                  onClick={() => handleCardClick(scholarship.id)}
+                >
+                  <Card className="cursor-pointer">
+                    <h2 className="text-xl font-bold mb-2 text-black">
+                      {scholarship.nama_beasiswa}
+                    </h2>
+                    <p className="text-black text-sm mb-4">
+                      {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                      {formatCustomDate(scholarship.tanggal_akhir)}
+                    </p>
+                    <p className="text-black text-sm mb-4">
+                      {scholarship.deskripsi.split(".")[0]}.
+                    </p>
+                    <div className="flex items-center space-x-2 mb-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-sm ${
+                          getScholarshipStatus(
+                            scholarship.tanggal_mulai,
+                            scholarship.tanggal_akhir
+                          ) === "Active"
+                            ? "bg-green-200 text-green-700"
+                            : "bg-red-200 text-red-700"
+                        }`}
+                      >
+                        {getScholarshipStatus(
                           scholarship.tanggal_mulai,
                           scholarship.tanggal_akhir
-                        ) === "Active"
-                          ? "bg-green-200 text-green-700"
-                          : "bg-red-200 text-red-700"
-                      }`}
-                    >
-                      {getScholarshipStatus(
-                        scholarship.tanggal_mulai,
-                        scholarship.tanggal_akhir
-                      )}
-                    </span>
-                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                      {scholarship.kategori}
-                    </span>
-                  </div>
-                  <button className="text-blue-600 font-semibold hover:underline">
-                    Read More
-                  </button>
-                </Card>
-              </div>
-            ))}
-          </CardsContainer>
+                        )}
+                      </span>
+                      <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                        {scholarship.kategori}
+                      </span>
+                    </div>
+                    <button className="text-blue-600 font-semibold hover:underline">
+                      Read More
+                    </button>
+                  </Card>
+                </div>
+              ))}
+            </CardsContainer>
+          )}
         </Container>
       </div>
       <Footer />
