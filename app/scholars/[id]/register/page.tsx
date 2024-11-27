@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { uploadFileToCloudinary } from "../../../../lib/fileupload";
 import Head from "next/head";
 
 type FormData = {
@@ -162,6 +163,7 @@ export default function ScholarshipRegistrationForm({
       !formData.email ||
       !formData.program_studi ||
       !formData.semester ||
+      !formData.alasan ||
       !formData.dokumen
     ) {
       toast.error("Please fill in all required fields.", {
@@ -177,6 +179,12 @@ export default function ScholarshipRegistrationForm({
 
       if (!id) {
         throw new Error("Scholarship ID not found.");
+      }
+
+      // Upload dokumen ke Cloudinary
+      let documentUrl = "";
+      if (formData.dokumen) {
+        documentUrl = await uploadFileToCloudinary(formData.dokumen);
       }
 
       // Generate registrationId
@@ -196,11 +204,12 @@ export default function ScholarshipRegistrationForm({
         email: formData.email,
         program_studi: formData.program_studi,
         semester: formData.semester,
+        alasan_mendaftar: formData.alasan,
         nama_beasiswa: scholarshipTitle,
         tanggal_pendaftaran: formatDate(new Date()), // Use DD-MM-YYYY format
         status: "menunggu persetujuan",
         catatan_admin: "",
-        dokumen: formData.dokumen?.name || "",
+        dokumen: documentUrl, // Use Cloudinary URL
       });
 
       toast.success("Registration submitted successfully!", {
@@ -380,4 +389,7 @@ export default function ScholarshipRegistrationForm({
       )}
     </div>
   );
+}
+function uploadToCloudinary(dokumen: File): string | PromiseLike<string> {
+  throw new Error("Function not implemented.");
 }
