@@ -15,8 +15,8 @@ import {
 
 export default function Home() {
   const [scholarships, setScholarships] = useState<any[]>([]); // State untuk menyimpan data beasiswa
-  const [isActiveDropdownOpen, setIsActiveDropdownOpen] = useState(false); // Dropdown status aktif
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false); // Dropdown kategori
+  const [isActiveDropdownOpen, setIsActiveDropdownOpen] = useState(true); // Dropdown status aktif (default terbuka)
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(true); // Dropdown kategori (default terbuka)
   const [selectedActiveFilters, setSelectedActiveFilters] = useState<string[]>(
     []
   ); // Filter masa aktif
@@ -25,6 +25,7 @@ export default function Home() {
   >([]); // Filter kategori
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // State untuk status login pengguna
   const [isLoading, setIsLoading] = useState<boolean>(true); // State untuk loading data
+  const [showAllCards, setShowAllCards] = useState<boolean>(false); // State untuk mengatur View More
 
   // Ambil data beasiswa dari Firestore
   useEffect(() => {
@@ -119,13 +120,13 @@ export default function Home() {
     <div>
       <HeroSection />
       <div className="bg-white py-16 px-16 mt-10">
-        <h1 className="text-4xl font-bold text-blue-900 mb-12 pl-4">
+        <h1 className="text-4xl font-bold text-blue-900 mb-12">
           Found Scholar
         </h1>
         <div className="flex flex-col md:flex-row gap-8">
           {/* Filter Section */}
           <div
-            className="w-full md:w-1/4 p-4 bg-white rounded-lg shadow-lg"
+            className="w-full md:w-1/4 p-4 bg-white border border-gray-300 rounded-lg shadow-lg"
             style={{
               height: "auto",
               minHeight: "300px", // Tinggi minimum agar konten selalu terlihat
@@ -217,51 +218,73 @@ export default function Home() {
           </div>
 
           {/* Cards Section */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {isLoading ? (
-              <div className="text-center col-span-2">Loading...</div>
-            ) : (
-              filteredScholarships.slice(0, 6).map((scholarship) => (
-                <div
-                  key={scholarship.id}
-                  className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer"
-                  onClick={() => handleCardClick(scholarship.id)}
-                >
-                  <h3 className="text-xl font-bold mb-2 text-black">
-                    {scholarship.nama_beasiswa}
-                  </h3>
-                  <p className="text-black text-sm mb-4">
-                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
-                    {formatCustomDate(scholarship.tanggal_akhir)}
-                  </p>
-                  <p className="text-black text-sm mb-4">
-                    {scholarship.deskripsi.split(".")[0]}.
-                  </p>
-                  <div className="flex items-center space-x-2 mb-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-sm ${
-                        getScholarshipStatus(
-                          scholarship.tanggal_mulai,
-                          scholarship.tanggal_akhir
-                        ) === "Active"
-                          ? "bg-green-200 text-green-700"
-                          : "bg-red-200 text-red-700"
-                      }`}
+          <div className="flex-1">
+            <div
+              className={`grid ${
+                filteredScholarships.length === 1
+                  ? "grid-cols-1"
+                  : "grid-cols-1 md:grid-cols-2"
+              } gap-8`}
+            >
+              {isLoading ? (
+                <div className="text-center col-span-2">Loading...</div>
+              ) : (
+                filteredScholarships
+                  .slice(0, showAllCards ? filteredScholarships.length : 6)
+                  .map((scholarship) => (
+                    <div
+                      key={scholarship.id}
+                      className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer"
+                      onClick={() => handleCardClick(scholarship.id)}
                     >
-                      {getScholarshipStatus(
-                        scholarship.tanggal_mulai,
-                        scholarship.tanggal_akhir
-                      )}
-                    </span>
-                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                      {scholarship.kategori}
-                    </span>
-                  </div>
-                  <button className="text-blue-600 font-semibold hover:underline">
-                    See Details
-                  </button>
-                </div>
-              ))
+                      <h3 className="text-xl font-bold mb-2 text-black">
+                        {scholarship.nama_beasiswa}
+                      </h3>
+                      <p className="text-black text-sm mb-4">
+                        {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                        {formatCustomDate(scholarship.tanggal_akhir)}
+                      </p>
+                      <p className="text-black text-sm mb-4">
+                        {scholarship.deskripsi.split(".")[0]}.
+                      </p>
+                      <div className="flex items-center space-x-2 mb-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-sm ${
+                            getScholarshipStatus(
+                              scholarship.tanggal_mulai,
+                              scholarship.tanggal_akhir
+                            ) === "Active"
+                              ? "bg-green-200 text-green-700"
+                              : "bg-red-200 text-red-700"
+                          }`}
+                        >
+                          {getScholarshipStatus(
+                            scholarship.tanggal_mulai,
+                            scholarship.tanggal_akhir
+                          )}
+                        </span>
+                        <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                          {scholarship.kategori}
+                        </span>
+                      </div>
+                      <button className="text-blue-600 font-semibold hover:underline">
+                        See Details
+                      </button>
+                    </div>
+                  ))
+              )}
+            </div>
+
+            {/* View More Button */}
+            {!isLoading && filteredScholarships.length > 6 && (
+              <div className="flex justify-end mt-8">
+                <button
+                  className="text-blue-600 font-semibold hover:underline"
+                  onClick={() => setShowAllCards(!showAllCards)}
+                >
+                  {showAllCards ? "Show Less" : "View More"} &gt;
+                </button>
+              </div>
             )}
           </div>
         </div>
