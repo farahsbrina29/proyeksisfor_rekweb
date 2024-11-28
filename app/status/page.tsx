@@ -86,6 +86,15 @@ export default function StatusPage() {
     fetchRegistrations();
   }, [userEmail, db]);
 
+  // Pemetaan status ke warna
+  const getStatusColor = (status: string) => {
+    const lowerStatus = status.toLowerCase(); // Normalisasi ke huruf kecil
+    if (lowerStatus === "disetujui" || lowerStatus === "approved") return "text-green-600";
+    if (lowerStatus === "tidak disetujui" || lowerStatus === "rejected") return "text-red-600";
+    if (lowerStatus.includes("menunggu")) return "text-yellow-600"; // Menunggu persetujuan
+    return "text-gray-600"; // Default untuk status lainnya
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10">
       <Head>
@@ -117,15 +126,7 @@ export default function StatusPage() {
               </p>
               <p className="text-sm text-gray-700 mt-2">
                 Status:{" "}
-                <span
-                  className={`font-semibold ${
-                    registration.status === "approved"
-                      ? "text-green-600"
-                      : registration.status === "rejected"
-                      ? "text-red-600"
-                      : "text-yellow-600"
-                  }`}
-                >
+                <span className={`font-semibold ${getStatusColor(registration.status)}`}>
                   {registration.status}
                 </span>
               </p>
