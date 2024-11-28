@@ -94,7 +94,7 @@ export default function Home() {
     <div>
       <HeroSection />
       <div className="bg-white py-16 px-16 mt-10">
-        <h1 className="text-4xl font-bold text-blue-900 mb-12">
+        <h1 className="text-4xl font-bold text-blue-900 mb-12 pl-4">
           Found Scholar
         </h1>
         <div className="flex flex-col md:flex-row gap-8">

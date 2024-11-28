@@ -110,8 +110,8 @@ export default function Home() {
 
   return (
     <div className="scholar-page">
-      <div className="bg-white py-16 px-6 sm:px-8 md:px-16 mt-10">
-        <h1 className="text-4xl font-bold text-blue-900 mb-12">
+      <div className="bg-white py-6 px-6 sm:px-8 md:px-16 mt-10">
+        <h1 className="text-4xl font-bold text-blue-900 mb-12 pl-12">
           Found Scholar
         </h1>
 
