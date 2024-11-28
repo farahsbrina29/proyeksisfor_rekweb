@@ -1,18 +1,18 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Footer from "../../components/footer";
-import Link from "next/link";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { auth } from "@/lib/firebaseConfig";
+import { auth, db } from "@/lib/firebaseConfig";
+import { collection, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import {
-  scholarships,
   parseCustomDate,
   getScholarshipStatus,
   formatCustomDate,
-} from "../data/scholarshipdata";
+} from "../../data/scholarshipdatautility";
 
 // Styled components
 const Container = styled.div`
@@ -22,37 +22,25 @@ const Container = styled.div`
   align-items: flex-start;
 `;
 
-const ButtonContainer = styled.div`
+const DropdownContainer = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 20px;
   flex-wrap: wrap;
-  justify-content: flex-start;
   margin-top: 20px;
   margin-left: 50px;
 `;
 
-const Button = styled.button<{ $isSelected: boolean }>`
-  background-color: ${(props) => (props.$isSelected ? "#143F6B" : "#D9D9D9")};
-  color: ${(props) => (props.$isSelected ? "white" : "black")};
-  border: none;
+const Dropdown = styled.select`
   padding: 8px 16px;
-  margin: 5px;
-  text-align: center;
-  font-size: 20px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: white;
   cursor: pointer;
-  border-radius: 15px;
-  min-width: 180px;
-  white-space: nowrap;
-  transition: background-color 0.3s ease, transform 0.2s ease;
 
-  &:hover {
-    background-color: #143f6b;
-    color: white;
-    transform: scale(1.1);
-  }
-
-  &:active {
-    background-color: #3e8e41;
+  &:focus {
+    outline: none;
+    border-color: #143f6b;
   }
 `;
 
@@ -69,7 +57,8 @@ const Card = styled.div`
   border: 1px solid #e5e5e5;
   border-radius: 8px;
   padding: 20px;
-  width: 95%;
+  width: 100%;
+  max-width: 2000px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
 
@@ -79,24 +68,47 @@ const Card = styled.div`
 `;
 
 export default function Home() {
-  const [selectedFilter, setSelectedFilter] = useState("All");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State untuk status login pengguna
+  const [scholarships, setScholarships] = useState<any[]>([]);
+  const [selectedAll, setSelectedAll] = useState("All");
+  const [selectedMasaAktif, setSelectedMasaAktif] = useState("");
+  const [selectedJenis, setSelectedJenis] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Cek status autentikasi pengguna menggunakan Firebase
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setIsLoggedIn(!!currentUser); // Update status login
+      setIsLoggedIn(!!currentUser);
     });
-    return () => unsubscribe(); // Cleanup listener
+    return () => unsubscribe();
+  }, []);
+
+  // Ambil data beasiswa dari Firestore
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        const scholarshipRef = collection(db, "scholarship");
+        const querySnapshot = await getDocs(scholarshipRef);
+        const data = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setScholarships(data);
+      } catch (error) {
+        console.error("Error fetching scholarships:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchScholarships();
   }, []);
 
   // Fungsi untuk handle klik pada card
   const handleCardClick = (id: string) => {
     if (isLoggedIn) {
-      // Jika pengguna sudah login, arahkan ke halaman detail
       window.location.href = `/scholars/${id}`;
     } else {
-      // Jika belum login, tampilkan toast pemberitahuan
       toast.error("Please sign in to view the scholarship details.", {
         position: "top-center",
         autoClose: 3000,
@@ -106,11 +118,6 @@ export default function Home() {
         draggable: true,
       });
     }
-  };
-
-  // Function to handle button click for filtering
-  const handleFilterClick = (filter: string) => {
-    setSelectedFilter(filter);
   };
 
   // Function to determine if the scholarship is active
@@ -124,19 +131,35 @@ export default function Home() {
     return today >= start && today <= end;
   };
 
-  // Filter scholarships based on selected filter
+  const willEndSoonScholarship = (tanggal_akhir: string): boolean => {
+    const today = new Date();
+    const end = parseCustomDate(tanggal_akhir);
+    return (
+      end > today &&
+      (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 30
+    );
+  };
+
+  // Filter scholarships based on dropdown selections
   const filteredScholarships =
-    selectedFilter === "All"
-      ? scholarships
-      : selectedFilter === "Active"
-      ? scholarships.filter((s) =>
-          isActiveScholarship(s.tanggal_mulai, s.tanggal_akhir)
-        )
-      : selectedFilter === "Inactive"
-      ? scholarships.filter(
-          (s) => !isActiveScholarship(s.tanggal_mulai, s.tanggal_akhir)
-        )
-      : scholarships.filter((s) => s.kategori === selectedFilter);
+    scholarships.length > 0
+      ? scholarships.filter((scholarship) => {
+          const isAll = selectedAll === "All";
+          const isMasaAktifValid =
+            selectedMasaAktif === "" ||
+            (selectedMasaAktif === "Sedang Berlangsung" &&
+              getScholarshipStatus(
+                scholarship.tanggal_mulai,
+                scholarship.tanggal_akhir
+              ) === "Active") ||
+            (selectedMasaAktif === "Akan Berakhir" &&
+              willEndSoonScholarship(scholarship.tanggal_akhir));
+          const isJenisValid =
+            selectedJenis === "" || scholarship.kategori === selectedJenis;
+
+          return isAll && isMasaAktifValid && isJenisValid;
+        })
+      : [];
 
   return (
     <div>
@@ -147,71 +170,84 @@ export default function Home() {
 
         <Container>
           {/* Filter Section */}
-          <ButtonContainer>
-            {[
-              "All",
-              "Active",
-              "Inactive",
-              "Akademik",
-              "Non Akademik",
-              "Bantuan",
-              "Penelitian",
-            ].map((filter) => (
-              <Button
-                key={filter}
-                $isSelected={selectedFilter === filter}
-                onClick={() => handleFilterClick(filter)}
-              >
-                {filter}
-              </Button>
-            ))}
-          </ButtonContainer>
+          <DropdownContainer>
+            <Dropdown
+              value={selectedAll}
+              onChange={(e) => setSelectedAll(e.target.value)}
+            >
+              <option value="All">All</option>
+            </Dropdown>
+
+            <Dropdown
+              value={selectedMasaAktif}
+              onChange={(e) => setSelectedMasaAktif(e.target.value)}
+            >
+              <option value="">Masa Aktif</option>
+              <option value="Sedang Berlangsung">Sedang Berlangsung</option>
+              <option value="Akan Berakhir">Akan Berakhir</option>
+            </Dropdown>
+
+            <Dropdown
+              value={selectedJenis}
+              onChange={(e) => setSelectedJenis(e.target.value)}
+            >
+              <option value="">Jenis Beasiswa</option>
+              <option value="Akademik">Akademik</option>
+              <option value="Non Akademik">Non Akademik</option>
+              <option value="Bantuan">Bantuan</option>
+              <option value="Penelitian">Penelitian</option>
+            </Dropdown>
+          </DropdownContainer>
 
           {/* Cards Section */}
-          <CardsContainer>
-            {filteredScholarships.map((scholarship) => (
-              <div
-                key={scholarship.id}
-                onClick={() => handleCardClick(scholarship.id)}
-              >
-                <Card className="cursor-pointer">
-                  <h2 className="text-xl font-bold mb-2 text-black">
-                    {scholarship.nama_beasiswa}
-                  </h2>
-                  <p className="text-black text-sm mb-4">
-                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
-                    {formatCustomDate(scholarship.tanggal_akhir)}
-                  </p>
-                  <p className="text-black text-sm mb-4">
-                    {scholarship.deskripsi.split(".")[0]}.
-                  </p>
-                  <div className="flex items-center space-x-2 mb-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-sm ${
-                        getScholarshipStatus(
+          {isLoading ? (
+            <div className="text-center mt-10">Loading scholarships...</div>
+          ) : (
+            <CardsContainer>
+              {filteredScholarships.map((scholarship) => (
+                <div
+                  key={scholarship.id}
+                  onClick={() => handleCardClick(scholarship.id)}
+                >
+                  <Card className="cursor-pointer">
+                    <h2 className="text-xl font-bold mb-2 text-black">
+                      {scholarship.nama_beasiswa}
+                    </h2>
+                    <p className="text-black text-sm mb-4">
+                      {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                      {formatCustomDate(scholarship.tanggal_akhir)}
+                    </p>
+                    <p className="text-black text-sm mb-4">
+                      {scholarship.deskripsi.split(".")[0]}.
+                    </p>
+                    <div className="flex items-center space-x-2 mb-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-sm ${
+                          getScholarshipStatus(
+                            scholarship.tanggal_mulai,
+                            scholarship.tanggal_akhir
+                          ) === "Active"
+                            ? "bg-green-200 text-green-700"
+                            : "bg-red-200 text-red-700"
+                        }`}
+                      >
+                        {getScholarshipStatus(
                           scholarship.tanggal_mulai,
                           scholarship.tanggal_akhir
-                        ) === "Active"
-                          ? "bg-green-200 text-green-700"
-                          : "bg-red-200 text-red-700"
-                      }`}
-                    >
-                      {getScholarshipStatus(
-                        scholarship.tanggal_mulai,
-                        scholarship.tanggal_akhir
-                      )}
-                    </span>
-                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                      {scholarship.kategori}
-                    </span>
-                  </div>
-                  <button className="text-blue-600 font-semibold hover:underline">
-                    Read More
-                  </button>
-                </Card>
-              </div>
-            ))}
-          </CardsContainer>
+                        )}
+                      </span>
+                      <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                        {scholarship.kategori}
+                      </span>
+                    </div>
+                    <button className="text-blue-600 font-semibold hover:underline">
+                      Read More
+                    </button>
+                  </Card>
+                </div>
+              ))}
+            </CardsContainer>
+          )}
         </Container>
       </div>
       <Footer />

@@ -3,20 +3,44 @@
 import { useEffect, useState } from "react";
 import HeroSection from "../components/heroSection";
 import Footer from "../components/footer";
-import {
-  scholarships,
-  getScholarshipStatus,
-  formatCustomDate,
-} from "../app/data/scholarshipdata";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { auth } from "@/lib/firebaseConfig";
+import { auth, db } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-
+import { collection, getDocs } from "firebase/firestore";
+import {
+  getScholarshipStatus,
+  formatCustomDate,
+} from "../data/scholarshipdatautility";
 
 export default function Home() {
+  const [scholarships, setScholarships] = useState<any[]>([]); // State untuk menyimpan data beasiswa
   const [selectedFilter, setSelectedFilter] = useState<string>("All"); // State untuk menyimpan filter aktif
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // State untuk status login pengguna
+  const [isLoading, setIsLoading] = useState<boolean>(true); // State untuk loading data
+
+  // Ambil data beasiswa dari Firestore
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      setIsLoading(true); // Set loading state
+      try {
+        const scholarshipRef = collection(db, "scholarship");
+        const snapshot = await getDocs(scholarshipRef);
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setScholarships(data);
+      } catch (error) {
+        console.error("Error fetching scholarships:", error);
+        toast.error("Failed to fetch scholarships. Please try again later.");
+      } finally {
+        setIsLoading(false); // Set loading state selesai
+      }
+    };
+
+    fetchScholarships();
+  }, []);
 
   // Simulasikan status login pengguna
   useEffect(() => {
@@ -135,47 +159,51 @@ export default function Home() {
 
           {/* Cards Section */}
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {filteredScholarships.slice(0, 6).map((scholarship) => (
-              <div
-                key={scholarship.id}
-                className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer"
-                onClick={() => handleCardClick(scholarship.id)} // Panggil fungsi handleCardClick saat kartu diklik
-              >
-                <h3 className="text-xl font-bold mb-2 text-black">
-                  {scholarship.nama_beasiswa}
-                </h3>
-                <p className="text-black text-sm mb-4">
-                  {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
-                  {formatCustomDate(scholarship.tanggal_akhir)}
-                </p>
-                <p className="text-black text-sm mb-4">
-                  {scholarship.deskripsi.split(".")[0]}.
-                </p>
-                <div className="flex items-center space-x-2 mb-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-sm ${
-                      getScholarshipStatus(
+            {isLoading ? (
+              <div className="text-center col-span-2">Loading...</div>
+            ) : (
+              filteredScholarships.slice(0, 6).map((scholarship) => (
+                <div
+                  key={scholarship.id}
+                  className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer"
+                  onClick={() => handleCardClick(scholarship.id)}
+                >
+                  <h3 className="text-xl font-bold mb-2 text-black">
+                    {scholarship.nama_beasiswa}
+                  </h3>
+                  <p className="text-black text-sm mb-4">
+                    {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
+                    {formatCustomDate(scholarship.tanggal_akhir)}
+                  </p>
+                  <p className="text-black text-sm mb-4">
+                    {scholarship.deskripsi.split(".")[0]}.
+                  </p>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        getScholarshipStatus(
+                          scholarship.tanggal_mulai,
+                          scholarship.tanggal_akhir
+                        ) === "Active"
+                          ? "bg-green-200 text-green-700"
+                          : "bg-red-200 text-red-700"
+                      }`}
+                    >
+                      {getScholarshipStatus(
                         scholarship.tanggal_mulai,
                         scholarship.tanggal_akhir
-                      ) === "Active"
-                        ? "bg-green-200 text-green-700"
-                        : "bg-red-200 text-red-700"
-                    }`}
-                  >
-                    {getScholarshipStatus(
-                      scholarship.tanggal_mulai,
-                      scholarship.tanggal_akhir
-                    )}
-                  </span>
-                  <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                    {scholarship.kategori}
-                  </span>
+                      )}
+                    </span>
+                    <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
+                      {scholarship.kategori}
+                    </span>
+                  </div>
+                  <button className="text-blue-600 font-semibold hover:underline">
+                    See Details
+                  </button>
                 </div>
-                <button className="text-blue-600 font-semibold hover:underline">
-                  See Details
-                </button>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 

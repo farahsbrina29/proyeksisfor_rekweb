@@ -6,15 +6,15 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-
+// Ambil konfigurasi dari environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyCJUO7Bdpnv2X2mlDOHO3C4lPgOiat392k",
-  authDomain: "scholarhub-b8170.firebaseapp.com",
-  projectId: "scholarhub-b8170",
-  storageBucket: "scholarhub-b8170.firebasestorage.app",
-  messagingSenderId: "193426535644",
-  appId: "1:193426535644:web:a8f8b6f1dc73c3ffebf019",
-  measurementId: "G-VZTVL5FR26",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Inisialisasi Firebase
