@@ -123,17 +123,6 @@ export default function Home() {
             <div className="dropdown-wrapper">
               <select
                 className="styled-dropdown"
-                value={selectedAll}
-                onChange={(e) => setSelectedAll(e.target.value)}
-              >
-                <option value="All">All</option>
-              </select>
-              <div className="dropdown-icon">▼</div>
-            </div>
-
-            <div className="dropdown-wrapper">
-              <select
-                className="styled-dropdown"
                 value={selectedMasaAktif}
                 onChange={(e) => setSelectedMasaAktif(e.target.value)}
               >
