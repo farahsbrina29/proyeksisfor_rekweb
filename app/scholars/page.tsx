@@ -1,104 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import Footer from "../../components/footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth, db } from "@/lib/firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import "../../styles/scholarpage.css";
 import {
   parseCustomDate,
   getScholarshipStatus,
   formatCustomDate,
 } from "../../data/scholarshipdatautility";
 
-// Styled components
-const Container = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-`;
 
-const DropdownContainer = styled.div`
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 20px;
-  margin-left: 50px;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    flex-direction: column; /* Menumpuk dropdown di layar kecil */
-    gap: 10px;
-  }
-`;
-
-const DropdownWrapper = styled.div`
-  position: relative;
-  width: 250px; /* Sesuaikan ukuran dropdown */
-  display: flex;
-  align-items: center;
-`;
-
-const StyledDropdown = styled.select`
-  appearance: none; /* Menghilangkan default dropdown browser */
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 16px;
-  color: #333;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-
-  &:hover {
-    border-color: #0d6efd; /* Warna biru pada hover */
-  }
-
-  &:focus {
-    outline: none;
-    border-color: #0d6efd; /* Warna biru pada fokus */
-    box-shadow: 0 0 8px rgba(13, 110, 253, 0.4); /* Glow biru */
-  }
-`;
-
-const DropdownIcon = styled.div`
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none; /* Ikon tidak mengganggu klik */
-  font-size: 20px;
-  color: #aaa;
-`;
-
-const CardsContainer = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 20px;
-  margin-left: 50px;
-`;
-
-const Card = styled.div`
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  padding: 20px;
-  width: 100%;
-  max-width: 2000px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease;
-
-  &:hover {
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-  }
-`;
 
 export default function Home() {
   const [scholarships, setScholarships] = useState<any[]>([]);
@@ -167,12 +83,13 @@ export default function Home() {
   const willEndSoonScholarship = (tanggal_akhir: string): boolean => {
     const today = new Date();
     const end = parseCustomDate(tanggal_akhir);
-    const daysLeft = (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-
-    // Tampilkan hanya beasiswa yang akan berakhir dalam waktu 3 hari ke depan
-    return daysLeft > 0 && daysLeft <= 3;
+    return (
+      end > today &&
+      (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 30
+    );
   };
 
+  // Filter scholarships based on dropdown selections
   const filteredScholarships =
     scholarships.length > 0
       ? scholarships.filter((scholarship) => {
@@ -194,29 +111,42 @@ export default function Home() {
       : [];
 
   return (
-    <div>
+    <div className="scholar-page">
       <div className="bg-white py-16 px-6 sm:px-8 md:px-16 mt-10">
         <h1 className="text-4xl font-bold text-blue-900 mb-12">
           Found Scholar
         </h1>
 
-        <Container>
+        <div className="container">
           {/* Filter Section */}
-          <DropdownContainer>
-            <DropdownWrapper>
-              <StyledDropdown
+          <div className="dropdown-container">
+            <div className="dropdown-wrapper">
+              <select
+                className="styled-dropdown"
+                value={selectedAll}
+                onChange={(e) => setSelectedAll(e.target.value)}
+              >
+                <option value="All">All</option>
+              </select>
+              <div className="dropdown-icon">▼</div>
+            </div>
+
+            <div className="dropdown-wrapper">
+              <select
+                className="styled-dropdown"
                 value={selectedMasaAktif}
                 onChange={(e) => setSelectedMasaAktif(e.target.value)}
               >
                 <option value="">Masa Aktif</option>
                 <option value="Sedang Berlangsung">Sedang Berlangsung</option>
                 <option value="Akan Berakhir">Akan Berakhir</option>
-              </StyledDropdown>
-              <DropdownIcon>▼</DropdownIcon> {/* Tambahkan ikon panah */}
-            </DropdownWrapper>
+              </select>
+              <div className="dropdown-icon">▼</div>
+            </div>
 
-            <DropdownWrapper>
-              <StyledDropdown
+            <div className="dropdown-wrapper">
+              <select
+                className="styled-dropdown"
                 value={selectedJenis}
                 onChange={(e) => setSelectedJenis(e.target.value)}
               >
@@ -225,22 +155,22 @@ export default function Home() {
                 <option value="Non Akademik">Non Akademik</option>
                 <option value="Bantuan">Bantuan</option>
                 <option value="Penelitian">Penelitian</option>
-              </StyledDropdown>
-              <DropdownIcon>▼</DropdownIcon> {/* Tambahkan ikon panah */}
-            </DropdownWrapper>
-          </DropdownContainer>
+              </select>
+              <div className="dropdown-icon">▼</div>
+            </div>
+          </div>
 
           {/* Cards Section */}
           {isLoading ? (
             <div className="text-center mt-10">Loading scholarships...</div>
           ) : (
-            <CardsContainer>
+            <div className="cards-container">
               {filteredScholarships.map((scholarship) => (
                 <div
                   key={scholarship.id}
                   onClick={() => handleCardClick(scholarship.id)}
                 >
-                  <Card className="cursor-pointer">
+                  <div className="card cursor-pointer">
                     <h2 className="text-xl font-bold mb-2 text-black">
                       {scholarship.nama_beasiswa}
                     </h2>
@@ -274,12 +204,12 @@ export default function Home() {
                     <button className="text-blue-600 font-semibold hover:underline">
                       Read More
                     </button>
-                  </Card>
+                  </div>
                 </div>
               ))}
-            </CardsContainer>
+            </div>
           )}
-        </Container>
+        </div>
       </div>
       <Footer />
     </div>
