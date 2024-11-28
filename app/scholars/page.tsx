@@ -83,10 +83,10 @@ export default function Home() {
   const willEndSoonScholarship = (tanggal_akhir: string): boolean => {
     const today = new Date();
     const end = parseCustomDate(tanggal_akhir);
-    return (
-      end > today &&
-      (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24) <= 30
-    );
+    const daysLeft = (end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+
+    // Tampilkan hanya beasiswa yang akan berakhir dalam waktu 3 hari ke depan
+    return daysLeft > 0 && daysLeft <= 3;
   };
 
   // Filter scholarships based on dropdown selections
