@@ -241,7 +241,7 @@ export default function ScholarshipRegistrationForm({
       </h1>
 
       {isAlreadyRegistered ? (
-        <p className="text-xl text-center text-red-500 font-bold">
+        <p className="text-xl text-center text-blue-900 font-bold">
           You have already registered for this scholarship.
         </p>
       ) : (
