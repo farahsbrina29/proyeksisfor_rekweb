@@ -20,9 +20,8 @@ const Footer = () => {
           <ul className="space-y-4 text-lg">
             <li>Academic Scholar</li>
             <li>Non-Academic Scholar</li>
-            <li>S1 Scholar</li>
-            <li>S2 Scholar</li>
-            <li>S3 Scholar</li>
+            <li>Bantuan</li>
+            <li>Penelitian</li>
           </ul>
         </div>
 
