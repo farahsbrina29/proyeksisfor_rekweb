@@ -28,20 +28,53 @@ const DropdownContainer = styled.div`
   flex-wrap: wrap;
   margin-top: 20px;
   margin-left: 50px;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column; /* Menumpuk dropdown di layar kecil */
+    gap: 10px;
+  }
 `;
 
-const Dropdown = styled.select`
-  padding: 8px 16px;
+const DropdownWrapper = styled.div`
+  position: relative;
+  width: 250px; /* Sesuaikan ukuran dropdown */
+  display: flex;
+  align-items: center;
+`;
+
+const StyledDropdown = styled.select`
+  appearance: none; /* Menghilangkan default dropdown browser */
+  width: 100%;
+  padding: 12px 16px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #0d6efd; /* Warna biru pada hover */
+  }
 
   &:focus {
     outline: none;
-    border-color: #143f6b;
+    border-color: #0d6efd; /* Warna biru pada fokus */
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.4); /* Glow biru */
   }
+`;
+
+const DropdownIcon = styled.div`
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; /* Ikon tidak mengganggu klik */
+  font-size: 20px;
+  color: #aaa;
 `;
 
 const CardsContainer = styled.div`
@@ -170,25 +203,31 @@ export default function Home() {
         <Container>
           {/* Filter Section */}
           <DropdownContainer>
-            <Dropdown
-              value={selectedMasaAktif}
-              onChange={(e) => setSelectedMasaAktif(e.target.value)}
-            >
-              <option value="">Masa Aktif</option>
-              <option value="Sedang Berlangsung">Sedang Berlangsung</option>
-              <option value="Akan Berakhir">Akan Berakhir</option>
-            </Dropdown>
+            <DropdownWrapper>
+              <StyledDropdown
+                value={selectedMasaAktif}
+                onChange={(e) => setSelectedMasaAktif(e.target.value)}
+              >
+                <option value="">Masa Aktif</option>
+                <option value="Sedang Berlangsung">Sedang Berlangsung</option>
+                <option value="Akan Berakhir">Akan Berakhir</option>
+              </StyledDropdown>
+              <DropdownIcon>▼</DropdownIcon> {/* Tambahkan ikon panah */}
+            </DropdownWrapper>
 
-            <Dropdown
-              value={selectedJenis}
-              onChange={(e) => setSelectedJenis(e.target.value)}
-            >
-              <option value="">Jenis Beasiswa</option>
-              <option value="Akademik">Akademik</option>
-              <option value="Non Akademik">Non Akademik</option>
-              <option value="Bantuan">Bantuan</option>
-              <option value="Penelitian">Penelitian</option>
-            </Dropdown>
+            <DropdownWrapper>
+              <StyledDropdown
+                value={selectedJenis}
+                onChange={(e) => setSelectedJenis(e.target.value)}
+              >
+                <option value="">Jenis Beasiswa</option>
+                <option value="Akademik">Akademik</option>
+                <option value="Non Akademik">Non Akademik</option>
+                <option value="Bantuan">Bantuan</option>
+                <option value="Penelitian">Penelitian</option>
+              </StyledDropdown>
+              <DropdownIcon>▼</DropdownIcon> {/* Tambahkan ikon panah */}
+            </DropdownWrapper>
           </DropdownContainer>
 
           {/* Cards Section */}
