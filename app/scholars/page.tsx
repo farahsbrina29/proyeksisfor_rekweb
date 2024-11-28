@@ -12,9 +12,7 @@ import {
   parseCustomDate,
   getScholarshipStatus,
   formatCustomDate,
-} from "../../data/scholarshipdatautility";
-
-
+} from "../../utility/scholarshipdatautility";
 
 export default function Home() {
   const [scholarships, setScholarships] = useState<any[]>([]);

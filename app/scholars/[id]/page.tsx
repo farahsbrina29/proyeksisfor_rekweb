@@ -9,7 +9,7 @@ import { doc, getDoc } from "firebase/firestore";
 import {
   getScholarshipStatus,
   formatCustomDate,
-} from "../../../data/scholarshipdatautility"; // Utility functions
+} from "../../../utility/scholarshipdatautility"; // Utility functions
 
 export default function ScholarDetail({
   params,

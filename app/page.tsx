@@ -11,7 +11,7 @@ import { collection, getDocs } from "firebase/firestore";
 import {
   getScholarshipStatus,
   formatCustomDate,
-} from "../data/scholarshipdatautility";
+} from "../utility/scholarshipdatautility";
 
 export default function Home() {
   const [scholarships, setScholarships] = useState<any[]>([]); // State untuk menyimpan data beasiswa
