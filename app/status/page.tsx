@@ -131,7 +131,7 @@ export default function StatusPage() {
               </p>
               {registration.catatan_admin && (
                 <p className="text-sm text-gray-600 mt-2">
-                  Admin Note: {registration.catatan_admin}
+                  Note: {registration.catatan_admin}
                 </p>
               )}
             </div>
