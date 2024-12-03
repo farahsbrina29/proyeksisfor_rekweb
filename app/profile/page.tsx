@@ -1,4 +1,4 @@
-"use client";
+"use client"; // <-- Add this line to mark this file as a client component
 
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebaseConfig";
@@ -105,12 +105,18 @@ export default function ProfilePage() {
           }
 
           const userDoc = doc(db, "users", user.uid);
-          await deleteDoc(userDoc);
+          await deleteDoc(userDoc); // Delete user data from Firestore
           await user.delete(); // Delete user from Firebase Authentication
+
+          // Logout user after account deletion
+          await auth.signOut();
+
           toast.success("Profile deleted successfully!", {
             position: "top-center",
             autoClose: 3000,
           });
+
+          // Redirect to login page after logout
           router.push("/auth/sign-in");
         } catch (error: any) {
           toast.error(`Error deleting profile: ${error.message}`, {
@@ -139,7 +145,7 @@ export default function ProfilePage() {
           </div>
         ) : isEditing ? (
           <>
-            {/* Input for Full Name only */}
+            {/* Input hanya untuk Fullname saja */}
             <div className="mb-6">
               <label
                 htmlFor="newFullName"
@@ -189,7 +195,7 @@ export default function ProfilePage() {
           </>
         ) : (
           <>
-            
+            {/* Menampilkan Full Name dan Email jadi Text */}
             <div className="mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
               <p className="text-sm text-gray-600">Full Name:</p>
               <p className="text-lg font-semibold text-gray-800">
