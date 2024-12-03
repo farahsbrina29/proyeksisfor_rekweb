@@ -15,11 +15,11 @@ export default function ProfilePage() {
   const [email, setEmail] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newFullName, setNewFullName] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // Tambahkan state untuk loading
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const fetchProfileData = async () => {
-    setIsLoading(true); // Mulai loading
+    setIsLoading(true);
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -50,12 +50,12 @@ export default function ProfilePage() {
         autoClose: 3000,
       });
     } finally {
-      setIsLoading(false); // Selesai loading
+      setIsLoading(false);
     }
   };
 
   const handleUpdate = async () => {
-    setIsLoading(true); // Mulai loading
+    setIsLoading(true);
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -80,7 +80,7 @@ export default function ProfilePage() {
         autoClose: 3000,
       });
     } finally {
-      setIsLoading(false); // Selesai loading
+      setIsLoading(false);
     }
   };
 
@@ -98,7 +98,7 @@ export default function ProfilePage() {
 
     if (!result.isConfirmed) return;
 
-    setIsLoading(true); // Mulai loading
+    setIsLoading(true);
     try {
       const user = auth.currentUser;
       if (!user) {
@@ -123,7 +123,7 @@ export default function ProfilePage() {
         autoClose: 3000,
       });
     } finally {
-      setIsLoading(false); // Selesai loading
+      setIsLoading(false);
     }
   };
 
@@ -132,13 +132,11 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      {/* Toast Notification */}
+    <div className="min-h-screen flex items-center justify-center bg-white">
       <ToastContainer />
-
-      <div className="w-full max-w-md p-6 bg-white rounded-3xl shadow-lg border border-gray-300">
-        <h1 className="text-2xl font-bold text-center mb-6 text-gray-700">
-          Profile
+      <div className="w-full max-w-3xl p-12 bg-white rounded-2xl shadow-2xl border border-gray-300">
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-700">
+          Profile Settings
         </h1>
         {isLoading ? (
           <div className="flex justify-center items-center h-40">
@@ -146,8 +144,7 @@ export default function ProfilePage() {
           </div>
         ) : isEditing ? (
           <>
-            {/* Form Edit */}
-            <div className="mb-4">
+            <div className="mb-6">
               <label
                 htmlFor="newFullName"
                 className="block text-sm font-medium text-gray-600"
@@ -157,7 +154,7 @@ export default function ProfilePage() {
               <input
                 type="text"
                 id="newFullName"
-                className="w-full px-4 py-2 mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full px-4 py-3 mt-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                 value={newFullName}
                 onChange={(e) => setNewFullName(e.target.value)}
               />
@@ -165,14 +162,14 @@ export default function ProfilePage() {
             <div className="flex justify-between">
               <button
                 onClick={handleUpdate}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-3xl shadow-md hover:bg-green-600 transition"
+                className="flex items-center gap-2 px-5 py-2 bg-green-500 text-white rounded-xl shadow-md hover:bg-green-600 transition"
               >
                 <FiSave />
-                Save Changes
+                Save
               </button>
               <button
                 onClick={() => setIsEditing(false)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-3xl shadow-md hover:bg-gray-400 transition"
+                className="flex items-center gap-2 px-5 py-2 bg-gray-300 text-gray-700 rounded-xl shadow-md hover:bg-gray-400 transition"
               >
                 <FiX />
                 Cancel
@@ -181,16 +178,15 @@ export default function ProfilePage() {
           </>
         ) : (
           <>
-            {/* Profile View */}
-            <div className="mb-6">
+            <div className="mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
               <p className="text-sm text-gray-600">Full Name:</p>
-              <p className="text-lg font-medium text-gray-800">
+              <p className="text-lg font-semibold text-gray-800">
                 {fullName || "Loading..."}
               </p>
             </div>
-            <div className="mb-6">
+            <div className="mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
               <p className="text-sm text-gray-600">Email:</p>
-              <p className="text-lg font-medium text-gray-800">
+              <p className="text-lg font-semibold text-gray-800">
                 {email || "Loading..."}
               </p>
             </div>
@@ -200,17 +196,17 @@ export default function ProfilePage() {
                   setIsEditing(true);
                   setNewFullName(fullName || "");
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-3xl shadow-md hover:bg-blue-600 transition"
+                className="flex items-center gap-2 px-5 py-2 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition"
               >
                 <FiEdit />
-                Edit Profile
+                Edit
               </button>
               <button
                 onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-3xl shadow-md hover:bg-red-600 transition"
+                className="flex items-center gap-2 px-5 py-2 bg-red-500 text-white rounded-xl shadow-md hover:bg-red-600 transition"
               >
                 <FiTrash2 />
-                Delete Account
+                Delete
               </button>
             </div>
           </>
