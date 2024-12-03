@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebaseConfig";
-import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { FiEdit, FiTrash2, FiSave, FiX } from "react-icons/fi";
+import { FiEdit, FiSave, FiX } from "react-icons/fi";
 import { toast, ToastContainer } from "react-toastify";
-import Swal from "sweetalert2";
 import "react-toastify/dist/ReactToastify.css";
 import "sweetalert2/dist/sweetalert2.min.css";
 
@@ -67,7 +66,7 @@ export default function ProfilePage() {
       }
 
       const userDoc = doc(db, "users", user.uid);
-      await updateDoc(userDoc, { fullName: newFullName });
+      await updateDoc(userDoc, { fullName: newFullName }); // hanya update fullName
       setFullName(newFullName);
       setIsEditing(false);
       toast.success("Profile updated successfully!", {
@@ -76,49 +75,6 @@ export default function ProfilePage() {
       });
     } catch (error: any) {
       toast.error(`Error updating profile: ${error.message}`, {
-        position: "top-center",
-        autoClose: 3000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "Once deleted, your account cannot be recovered!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
-    });
-
-    if (!result.isConfirmed) return;
-
-    setIsLoading(true);
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        toast.warn("No user logged in!", {
-          position: "top-center",
-          autoClose: 3000,
-        });
-        return;
-      }
-
-      const userDoc = doc(db, "users", user.uid);
-      await deleteDoc(userDoc);
-      await user.delete();
-      toast.success("Account deleted successfully!", {
-        position: "top-center",
-        autoClose: 3000,
-      });
-      router.push("/");
-    } catch (error: any) {
-      toast.error(`Error deleting account: ${error.message}`, {
         position: "top-center",
         autoClose: 3000,
       });
@@ -144,6 +100,7 @@ export default function ProfilePage() {
           </div>
         ) : isEditing ? (
           <>
+            {/* Input for Full Name only */}
             <div className="mb-6">
               <label
                 htmlFor="newFullName"
@@ -157,6 +114,21 @@ export default function ProfilePage() {
                 className="w-full px-4 py-3 mt-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
                 value={newFullName}
                 onChange={(e) => setNewFullName(e.target.value)}
+              />
+            </div>
+            <div className="mb-6">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-600"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                className="w-full px-4 py-3 mt-2 border rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={email || ""}
+                disabled
               />
             </div>
             <div className="flex justify-between">
@@ -178,6 +150,7 @@ export default function ProfilePage() {
           </>
         ) : (
           <>
+            {/* Display Full Name and Email as Text */}
             <div className="mb-8 p-4 bg-gray-100 rounded-lg shadow-md">
               <p className="text-sm text-gray-600">Full Name:</p>
               <p className="text-lg font-semibold text-gray-800">
@@ -190,23 +163,13 @@ export default function ProfilePage() {
                 {email || "Loading..."}
               </p>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-center">
               <button
-                onClick={() => {
-                  setIsEditing(true);
-                  setNewFullName(fullName || "");
-                }}
+                onClick={() => setIsEditing(true)}
                 className="flex items-center gap-2 px-5 py-2 bg-blue-500 text-white rounded-xl shadow-md hover:bg-blue-600 transition"
               >
                 <FiEdit />
                 Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 px-5 py-2 bg-red-500 text-white rounded-xl shadow-md hover:bg-red-600 transition"
-              >
-                <FiTrash2 />
-                Delete
               </button>
             </div>
           </>
