@@ -10,6 +10,12 @@ import {
   getFirestore,
 } from "firebase/firestore";
 import Head from "next/head";
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/solid"; // Heroicons untuk ikon
 
 type RegistrationData = {
   id: string;
@@ -86,13 +92,28 @@ export default function StatusPage() {
     fetchRegistrations();
   }, [userEmail, db]);
 
-  // Pemetaan status ke warna
-  const getStatusColor = (status: string) => {
-    const lowerStatus = status.toLowerCase(); // Normalisasi ke huruf kecil
-    if (lowerStatus === "disetujui" || lowerStatus === "approved") return "text-green-600";
-    if (lowerStatus === "tidak disetujui" || lowerStatus === "rejected") return "text-red-600";
-    if (lowerStatus.includes("menunggu")) return "text-yellow-600"; // Menunggu persetujuan
-    return "text-gray-600"; // Default untuk status lainnya
+  // Fungsi untuk mendapatkan ikon dan tooltip berdasarkan status
+  const getBadgeIcon = (status: string) => {
+    const lowerStatus = status.toLowerCase();
+    if (lowerStatus === "disetujui" || lowerStatus === "approved")
+      return {
+        icon: <CheckCircleIcon className="h-6 w-6 text-green-500" />,
+        tooltip: "Approved",
+      };
+    if (lowerStatus === "tidak disetujui" || lowerStatus === "rejected")
+      return {
+        icon: <XCircleIcon className="h-6 w-6 text-red-500" />,
+        tooltip: "Rejected",
+      };
+    if (lowerStatus.includes("menunggu"))
+      return {
+        icon: <ClockIcon className="h-6 w-6 text-yellow-500" />,
+        tooltip: "Pending",
+      };
+    return {
+      icon: <QuestionMarkCircleIcon className="h-6 w-6 text-gray-500" />,
+      tooltip: "Unknown",
+    };
   };
 
   return (
@@ -113,30 +134,39 @@ export default function StatusPage() {
         </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {registrations.map((registration, index) => (
-            <div
-              key={`${registration.id}-${index}`} // Pastikan key unik dengan menambahkan indeks
-              className="border rounded-lg p-6 shadow-md hover:shadow-lg transition"
-            >
-              <h2 className="text-xl font-bold text-blue-900">
-                {registration.nama_beasiswa}
-              </h2>
-              <p className="text-sm text-gray-700">
-                Registered on: {registration.tanggal_pendaftaran}
-              </p>
-              <p className="text-sm text-gray-700 mt-2">
-                Status:{" "}
-                <span className={`font-semibold ${getStatusColor(registration.status)}`}>
-                  {registration.status}
-                </span>
-              </p>
-              {registration.catatan_admin && (
-                <p className="text-sm text-gray-600 mt-2">
-                  Note: {registration.catatan_admin}
+          {registrations.map((registration, index) => {
+            const badge = getBadgeIcon(registration.status);
+            return (
+              <div
+                key={`${registration.id}-${index}`} // Pastikan key unik dengan menambahkan indeks
+                className="border rounded-lg p-6 shadow-md hover:shadow-lg transition relative"
+              >
+                <h2 className="text-xl font-bold text-blue-900">
+                  {registration.nama_beasiswa}
+                </h2>
+                <p className="text-sm text-gray-700">
+                  Registered on: {registration.tanggal_pendaftaran}
                 </p>
-              )}
-            </div>
-          ))}
+                <p className="text-sm text-gray-700 mt-2">
+                  Status:{" "}
+                  <span className="font-semibold">{registration.status}</span>
+                </p>
+                {registration.catatan_admin && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Note: {registration.catatan_admin}
+                  </p>
+                )}
+
+                {/* Badge Icon */}
+                <div
+                  className="absolute top-4 right-4 flex items-center"
+                  title={badge.tooltip} // Tooltip untuk ikon
+                >
+                  {badge.icon}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
