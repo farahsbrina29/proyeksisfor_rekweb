@@ -10,6 +10,7 @@ import {
   getScholarshipStatus,
   formatCustomDate,
 } from "../../../utility/scholarshipdatautility"; // Utility functions
+import ScholarshipDetailLoader from "@/components/Loader/scholarDetailLoader";
 
 export default function ScholarDetail({
   params,
@@ -51,11 +52,7 @@ export default function ScholarDetail({
   }, [params]);
 
   if (isLoading) {
-    return (
-      <div className="text-center py-16">
-        <h1 className="text-3xl font-bold">Loading...</h1>
-      </div>
-    );
+    return <ScholarshipDetailLoader />;
   }
 
   if (!scholarship) {

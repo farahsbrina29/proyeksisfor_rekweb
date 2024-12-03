@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   collection,
@@ -15,10 +16,13 @@ import {
   XCircleIcon,
   ClockIcon,
   QuestionMarkCircleIcon,
-} from "@heroicons/react/solid"; // Heroicons untuk ikon
+} from "@heroicons/react/solid";
+import { Loader2 } from "lucide-react"; // Import loader untuk efek loading
+import StatusSkeletonLoader from "@/components/Loader/statusLoader";
 
 type RegistrationData = {
-  id: string;
+  id: string; // Registration ID (subcollection)
+  scholarshipId: string; // Parent collection ID
   nama: string;
   nim: string;
   email: string;
@@ -36,15 +40,16 @@ export default function StatusPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const db = getFirestore();
+  const router = useRouter();
 
   // Fetch user data
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && user.email) {
-        setUserEmail(user.email); // Update email pengguna
+        setUserEmail(user.email);
       } else {
-        setUserEmail(null); // Reset jika pengguna logout
+        setUserEmail(null);
       }
     });
     return () => unsubscribe();
@@ -53,7 +58,7 @@ export default function StatusPage() {
   // Fetch registrations from Firestore
   useEffect(() => {
     const fetchRegistrations = async () => {
-      if (!userEmail) return; // Jika email tidak ada, hentikan eksekusi
+      if (!userEmail) return;
 
       setIsLoading(true);
       const registrationsList: RegistrationData[] = [];
@@ -61,12 +66,12 @@ export default function StatusPage() {
         const scholarshipsRef = collection(db, "scholarship");
         const snapshot = await getDocs(scholarshipsRef);
 
-        // Loop through scholarships to fetch subcollection data
         for (const doc of snapshot.docs) {
+          const scholarshipId = doc.id; // ID of scholarship
           const subcollectionRef = collection(
             db,
             "scholarship",
-            doc.id,
+            scholarshipId,
             "pendaftaran_beasiswa"
           );
 
@@ -78,7 +83,11 @@ export default function StatusPage() {
 
           registrationsSnapshot.forEach((regDoc) => {
             const data = regDoc.data() as RegistrationData;
-            registrationsList.push({ ...data, id: `${regDoc.id}` });
+            registrationsList.push({
+              ...data,
+              id: regDoc.id, // ID of pendaftaran_beasiswa
+              scholarshipId, // Parent scholarship ID
+            });
           });
         }
       } catch (error) {
@@ -92,77 +101,93 @@ export default function StatusPage() {
     fetchRegistrations();
   }, [userEmail, db]);
 
-  // Fungsi untuk mendapatkan ikon dan tooltip berdasarkan status
+  // Fungsi untuk mendapatkan ikon berdasarkan status
   const getBadgeIcon = (status: string) => {
     const lowerStatus = status.toLowerCase();
     if (lowerStatus === "disetujui" || lowerStatus === "approved")
       return {
-        icon: <CheckCircleIcon className="h-6 w-6 text-green-500" />,
+        icon: <CheckCircleIcon className="h-10 w-10 text-green-500" />,
         tooltip: "Approved",
       };
     if (lowerStatus === "tidak disetujui" || lowerStatus === "rejected")
       return {
-        icon: <XCircleIcon className="h-6 w-6 text-red-500" />,
+        icon: <XCircleIcon className="h-10 w-10 text-red-500" />,
         tooltip: "Rejected",
       };
     if (lowerStatus.includes("menunggu"))
       return {
-        icon: <ClockIcon className="h-6 w-6 text-yellow-500" />,
+        icon: <ClockIcon className="h-10 w-10 text-yellow-500" />,
         tooltip: "Pending",
       };
     return {
-      icon: <QuestionMarkCircleIcon className="h-6 w-6 text-gray-500" />,
-      tooltip: "Unknown",
-    };
+      icon: <QuestionMarkCircleIcon className="h-10 w-10 text-gray-500" />,
+        tooltip: "Unknown",
+      };
   };
 
+  // Fungsi navigasi ke halaman detail
+  const handleViewDetails = (scholarshipId: string, registrationId: string) => {
+    if (scholarshipId && registrationId) {
+      router.push(`/status/${scholarshipId}/${registrationId}`); // Navigasi dengan dua parameter
+    } else {
+      console.error("Invalid IDs for navigation");
+    }
+  };
+
+  if (isLoading) {
+    return <StatusSkeletonLoader itemCount={6} layout="grid" />;
+  }
+
   return (
-    <div className="w-full max-w-7xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10">
+    <div className="w-full max-w-7xl mx-auto p-8 bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg rounded-2xl mt-10">
       <Head>
         <title>My Submitted Scholarships</title>
       </Head>
 
-      <h1 className="text-4xl font-bold text-left text-black mb-8">
+      <h1 className="text-4xl font-extrabold text-gray-800 mb-8 text-center">
         My Submitted Scholarships
       </h1>
 
-      {isLoading ? (
-        <p className="text-lg text-center">Loading...</p>
-      ) : registrations.length === 0 ? (
+      {registrations.length === 0 ? (
         <p className="text-lg text-center text-gray-500">
           You have not registered for any scholarships yet.
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {registrations.map((registration, index) => {
             const badge = getBadgeIcon(registration.status);
             return (
               <div
-                key={`${registration.id}-${index}`} // Pastikan key unik dengan menambahkan indeks
-                className="border rounded-lg p-6 shadow-md hover:shadow-lg transition relative"
+                key={`${registration.scholarshipId}-${registration.id}`}
+                className="relative border rounded-lg p-6 shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-2 bg-white"
               >
-                <h2 className="text-xl font-bold text-blue-900">
+                <div className="absolute top-4 right-4">{badge.icon}</div>
+
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
                   {registration.nama_beasiswa}
                 </h2>
-                <p className="text-sm text-gray-700">
-                  Registered on: {registration.tanggal_pendaftaran}
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">Registered on:</span>{" "}
+                  {registration.tanggal_pendaftaran}
                 </p>
-                <p className="text-sm text-gray-700 mt-2">
-                  Status:{" "}
-                  <span className="font-semibold">{registration.status}</span>
+                <p className="text-sm text-gray-600 mt-2">
+                  <span className="font-medium">Status:</span>{" "}
+                  <span className="font-semibold text-gray-700">
+                    {registration.status}
+                  </span>
                 </p>
-                {registration.catatan_admin && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    Note: {registration.catatan_admin}
-                  </p>
-                )}
-
-                {/* Badge Icon */}
-                <div
-                  className="absolute top-4 right-4 flex items-center"
-                  title={badge.tooltip} // Tooltip untuk ikon
-                >
-                  {badge.icon}
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() =>
+                      handleViewDetails(
+                        registration.scholarshipId,
+                        registration.id
+                      )
+                    }
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#143F6B] rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             );

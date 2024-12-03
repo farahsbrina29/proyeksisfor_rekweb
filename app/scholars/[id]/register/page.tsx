@@ -16,6 +16,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { uploadFileToCloudinary } from "../../../../lib/fileupload";
 import Head from "next/head";
+import RegisterScholarshipLoader from "@/components/Loader/registerscholarLoader";
+import router from "next/dist/client/router";
 
 type FormData = {
   nama: string;
@@ -47,10 +49,11 @@ export default function ScholarshipRegistrationForm({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isAlreadyRegistered, setIsAlreadyRegistered] =
     useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const db = getFirestore();
 
-  // Fetch authenticated user data from Firebase Auth
+  // Fetch authenticated user data
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -78,7 +81,7 @@ export default function ScholarshipRegistrationForm({
     return () => unsubscribe();
   }, [db]);
 
-  // Fetch scholarship title dynamically based on documentid
+  // Fetch scholarship title dynamically based on document ID
   useEffect(() => {
     (async () => {
       const { id } = await params;
@@ -112,6 +115,8 @@ export default function ScholarshipRegistrationForm({
         }
       } catch (error) {
         console.error("Error fetching scholarship data:", error);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [db, params, formData.email]);
@@ -181,22 +186,18 @@ export default function ScholarshipRegistrationForm({
         throw new Error("Scholarship ID not found.");
       }
 
-      // Upload dokumen ke Cloudinary
       let documentUrl = "";
       if (formData.dokumen) {
         documentUrl = await uploadFileToCloudinary(formData.dokumen);
       }
 
-      // Generate registrationId
       const registrationId = await generateRegistrationId(id);
 
-      // Reference to the subcollection
       const registrationRef = doc(
         collection(db, "scholarship", id, "pendaftaran_beasiswa"),
         formData.nim
       );
 
-      // Save the data to Firestore
       await setDoc(registrationRef, {
         registrationId,
         nama: formData.nama,
@@ -206,10 +207,10 @@ export default function ScholarshipRegistrationForm({
         semester: formData.semester,
         alasan_mendaftar: formData.alasan,
         nama_beasiswa: scholarshipTitle,
-        tanggal_pendaftaran: formatDate(new Date()), // Use DD-MM-YYYY format
+        tanggal_pendaftaran: formatDate(new Date()),
         status: "menunggu persetujuan",
         catatan_admin: "",
-        dokumen: documentUrl, // Use Cloudinary URL
+        dokumen: documentUrl,
       });
 
       toast.success("Registration submitted successfully!", {
@@ -219,7 +220,7 @@ export default function ScholarshipRegistrationForm({
 
       setTimeout(() => {
         window.location.href = `/status`;
-      }, 3000);
+      }, 1500);
     } catch (error) {
       console.error("Error submitting registration:", error);
       toast.error("Failed to submit registration. Please try again later.", {
@@ -229,6 +230,10 @@ export default function ScholarshipRegistrationForm({
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return <RegisterScholarshipLoader />;
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-10">
@@ -241,12 +246,22 @@ export default function ScholarshipRegistrationForm({
       </h1>
 
       {isAlreadyRegistered ? (
-        <p className="text-xl text-center text-blue-900 font-bold">
-          You have already registered for this scholarship.
-        </p>
+        <div className="text-center py-16">
+          <p className="text-2xl font-bold text-blue-800 mb-4">
+            You have already registered for this scholarship.
+          </p>
+          <p className="text-gray-700 mb-6">
+            Please check your application status for updates.
+          </p>
+          <button
+            onClick={() => (window.location.href = `/status`)}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Go to Status Page
+          </button>
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
-          {/* Form fields */}
           {/* Nama */}
           <div>
             <label htmlFor="nama" className="block text-lg font-semibold mb-2">
@@ -389,7 +404,4 @@ export default function ScholarshipRegistrationForm({
       )}
     </div>
   );
-}
-function uploadToCloudinary(dokumen: File): string | PromiseLike<string> {
-  throw new Error("Function not implemented.");
 }

@@ -12,6 +12,7 @@ import {
   getScholarshipStatus,
   formatCustomDate,
 } from "../utility/scholarshipdatautility";
+import HomeSkeletonLoader from "@/components/Loader/homeLoader";
 
 export default function Home() {
   const [scholarships, setScholarships] = useState<any[]>([]); // State untuk menyimpan data beasiswa
@@ -114,6 +115,9 @@ export default function Home() {
   return (
     <div>
       <HeroSection />
+      {isLoading ? (
+        <HomeSkeletonLoader />
+      ) : (
       <div className="bg-white py-16 px-16 mt-10">
         <h1 className="text-4xl font-bold text-blue-900 mb-12">
           Found Scholar
@@ -221,10 +225,8 @@ export default function Home() {
                   : "grid-cols-1 md:grid-cols-2"
               } gap-8`}
             >
-              {isLoading ? (
-                <div className="text-center col-span-2">Loading...</div>
-              ) : (
-                filteredScholarships.slice(0, 6).map((scholarship) => (
+              
+                {filteredScholarships.slice(0, 6).map((scholarship) => (
                   <div
                     key={scholarship.id}
                     className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer"
@@ -264,8 +266,7 @@ export default function Home() {
                       See Details
                     </button>
                   </div>
-                ))
-              )}
+              ))}
             </div>
 
             {/* View More Button */}
@@ -282,7 +283,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      )}
       <Footer />
     </div>
-  );
-}
+  )}

@@ -13,6 +13,7 @@ import {
   getScholarshipStatus,
   formatCustomDate,
 } from "../../utility/scholarshipdatautility";
+import ScholarshipLoader from "@/components/Loader/scholarLoeader";
 
 export default function Home() {
   const [scholarships, setScholarships] = useState<any[]>([]);
@@ -149,7 +150,7 @@ export default function Home() {
 
           {/* Cards Section */}
           {isLoading ? (
-            <div className="text-center mt-10">Loading scholarships...</div>
+            <ScholarshipLoader itemCount={6} /> // Jumlah skeleton cards
           ) : (
             <div className="cards-container">
               {filteredScholarships.map((scholarship) => (
