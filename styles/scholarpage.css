@@ -1,4 +1,4 @@
-.scholar-page .container {
+.scholar-page .scholar-content-container {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -84,4 +84,41 @@
 
 .scholar-page .card:hover {
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Footer Styling */
+.scholar-page footer {
+    width: 100%;
+    margin: 0;
+    padding: 3rem 0;
+    background-color: #143F6B;
+    color: white;
+}
+
+.scholar-page footer .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    text-align: left;
+}
+
+.scholar-page footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.scholar-page footer li {
+    margin-bottom: 1rem;
+}
+
+.scholar-page footer li span {
+    margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .scholar-page footer .container {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
 }
