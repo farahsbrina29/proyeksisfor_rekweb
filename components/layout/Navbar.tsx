@@ -59,7 +59,10 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-[#143F6B] text-white">
+    <nav
+      className="bg-[#143F6B] text-white sticky top-0 z-50 shadow-md"
+      // Sticky navbar with shadow
+    >
       {/* Toast Notification */}
       <ToastContainer />
 
