@@ -12,10 +12,10 @@ const StatusSkeletonLoader: React.FC<StatusSkeletonLoaderProps> = ({
   return (
     <div
       className={`${
-        layout === "grid"
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          : "space-y-4"
-      } p-8`}
+      layout === "grid"
+        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        : "space-y-4"
+      } px-72 py-32`}
     >
       {Array.from({ length: itemCount }).map((_, index) => (
         <div
