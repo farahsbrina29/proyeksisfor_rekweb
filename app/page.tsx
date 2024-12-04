@@ -1,32 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import HeroSection from "../components/layout/heroSection";
-import Footer from "../components/layout/footer";
+import HeroSection from "@/components/layout/heroSection";
+import Footer from "@/components/layout/footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth, db } from "@/lib/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
-import {
-  getScholarshipStatus,
-  formatCustomDate,
-} from "../utility/scholarshipdatautility";
+import FilterSection from "@/components/home/FilterSection";
+import ScholarshipCard from "@/components/home/ScholarshipCard";
 import HomeSkeletonLoader from "@/components/Loader/homeLoader";
+import { getScholarshipStatus, formatCustomDate } from "@/utility/scholarshipdatautility";
 
 export default function Home() {
-  const [scholarships, setScholarships] = useState<any[]>([]); // State untuk menyimpan data beasiswa
-  const [isActiveDropdownOpen, setIsActiveDropdownOpen] = useState(true); // Dropdown status aktif (default terbuka)
-  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(true); // Dropdown kategori (default terbuka)
-  const [selectedActiveFilters, setSelectedActiveFilters] = useState<string[]>([]); // Filter masa aktif
-  const [selectedCategoryFilters, setSelectedCategoryFilters] = useState<string[]>([]); // Filter kategori
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false); // State untuk status login pengguna
-  const [isLoading, setIsLoading] = useState<boolean>(true); // State untuk loading data
+  const [scholarships, setScholarships] = useState<any[]>([]);
+  const [isActiveDropdownOpen, setIsActiveDropdownOpen] = useState(true);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(true);
+  const [selectedActiveFilters, setSelectedActiveFilters] = useState<string[]>([]);
+  const [selectedCategoryFilters, setSelectedCategoryFilters] = useState<string[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Ambil data beasiswa dari Firestore
   useEffect(() => {
     const fetchScholarships = async () => {
-      setIsLoading(true); // Set loading state
+      setIsLoading(true);
       try {
         const scholarshipRef = collection(db, "scholarship");
         const snapshot = await getDocs(scholarshipRef);
@@ -39,7 +38,7 @@ export default function Home() {
         console.error("Error fetching scholarships:", error);
         toast.error("Failed to fetch scholarships. Please try again later.");
       } finally {
-        setIsLoading(false); // Set loading state selesai
+        setIsLoading(false);
       }
     };
 
@@ -49,9 +48,9 @@ export default function Home() {
   // Simulasikan status login pengguna
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setIsLoggedIn(!!currentUser); // Update status login berdasarkan autentikasi Firebase
+      setIsLoggedIn(!!currentUser);
     });
-    return () => unsubscribe(); // Hapus listener saat komponen dilepas
+    return () => unsubscribe();
   }, []);
 
   // Fungsi untuk menangani perubahan filter
@@ -71,22 +70,24 @@ export default function Home() {
     }
   };
 
-  // Fungsi untuk memfilter daftar beasiswa berdasarkan kategori atau status
+  // Reset Filters
+  const resetFilters = () => {
+    setSelectedActiveFilters([]);
+    setSelectedCategoryFilters([]);
+  };
+
+  // Fungsi untuk memfilter daftar beasiswa
   const filteredScholarships = scholarships.filter((scholarship) => {
     const status = getScholarshipStatus(
       scholarship.tanggal_mulai,
       scholarship.tanggal_akhir
     );
 
-    // Filter berdasarkan status aktif
     const isActiveMatch =
       selectedActiveFilters.length === 0 ||
-      (selectedActiveFilters.includes("Masih Berlangsung") &&
-        status === "Active") ||
-      (selectedActiveFilters.includes("Akan Berakhir") &&
-        status === "Inactive");
+      (selectedActiveFilters.includes("Masih Berlangsung") && status === "Active") ||
+      (selectedActiveFilters.includes("Akan Berakhir") && status === "Inactive");
 
-    // Filter berdasarkan kategori
     const isCategoryMatch =
       selectedCategoryFilters.length === 0 ||
       selectedCategoryFilters.includes(scholarship.kategori);
@@ -97,10 +98,8 @@ export default function Home() {
   // Fungsi untuk handle klik pada card
   const handleCardClick = (id: string) => {
     if (isLoggedIn) {
-      // Jika pengguna sudah login, arahkan ke halaman detail
       window.location.href = `/scholars/${id}`;
     } else {
-      // Jika belum login, tampilkan toast pemberitahuan
       toast.error("Please sign in to view the scholarship details.", {
         position: "top-center",
         autoClose: 3000,
@@ -118,172 +117,60 @@ export default function Home() {
       {isLoading ? (
         <HomeSkeletonLoader />
       ) : (
-      <div className="bg-white py-16 px-16 mt-10">
-        <h1 className="text-4xl font-bold text-blue-900 mb-12">
-          Found Scholar
-        </h1>
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Filter Section */}
-          <div
-            className="w-full md:w-1/4 p-4 bg-white border border-gray-300 rounded-lg shadow-lg"
-            style={{
-              height: "auto",
-              minHeight: "300px", // Tinggi minimum agar konten selalu terlihat
-              maxHeight: "450px", // Tinggi maksimum sesuai desain
-              overflow: "hidden", // Agar konten tidak meluas
-            }}
-          >
-            {/* Header Filter */}
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl text-black font-bold">Filter</h2>
-              <button
-                className="text-blue-600 font-semibold hover:underline"
-                onClick={() => {
-                  setSelectedActiveFilters([]);
-                  setSelectedCategoryFilters([]);
-                }}
-              >
-                Reset
-              </button>
-            </div>
+        <div className="bg-white py-16 px-16 mt-10">
+          <h1 className="text-4xl font-bold text-blue-900 mb-12">Found Scholar</h1>
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Filter Section */}
+            <FilterSection
+              isActiveDropdownOpen={isActiveDropdownOpen}
+              setIsActiveDropdownOpen={setIsActiveDropdownOpen}
+              isCategoryDropdownOpen={isCategoryDropdownOpen}
+              setIsCategoryDropdownOpen={setIsCategoryDropdownOpen}
+              selectedActiveFilters={selectedActiveFilters}
+              selectedCategoryFilters={selectedCategoryFilters}
+              handleFilterChange={handleFilterChange}
+              resetFilters={resetFilters}
+            />
 
-            {/* Dropdown Masa Aktif */}
-            <div className="mb-4">
-              <button
-                className="flex justify-between items-center w-full text-left text-lg font-medium text-black border-b border-gray-300 pb-2"
-                onClick={() =>
-                  setIsActiveDropdownOpen(!isActiveDropdownOpen)
-                }
+            {/* Cards Section */}
+            <div className="flex-1">
+              <div
+                className={`grid ${
+                  filteredScholarships.length === 1
+                    ? "grid-cols-1"
+                    : "grid-cols-1 md:grid-cols-2"
+                } gap-8`}
               >
-                Masa Aktif
-                <span>{isActiveDropdownOpen ? "▲" : "▼"}</span>
-              </button>
-              {isActiveDropdownOpen && (
-                <div className="mt-2 space-y-2">
-                  {["Masih Berlangsung", "Akan Berakhir"].map((option) => (
-                    <label
-                      key={option}
-                      className="flex items-center space-x-2 text-black"
-                    >
-                      <input
-                        type="checkbox"
-                        className="form-checkbox"
-                        checked={selectedActiveFilters.includes(option)}
-                        onChange={() =>
-                          handleFilterChange("active", option)
-                        }
-                      />
-                      <span>{option}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Dropdown Jenis Beasiswa */}
-            <div className="mb-4">
-              <button
-                className="flex justify-between items-center w-full text-left text-lg font-medium text-black border-b border-gray-300 pb-2"
-                onClick={() =>
-                  setIsCategoryDropdownOpen(!isCategoryDropdownOpen)
-                }
-              >
-                Jenis Beasiswa
-                <span>{isCategoryDropdownOpen ? "▲" : "▼"}</span>
-              </button>
-              {isCategoryDropdownOpen && (
-                <div className="mt-2 space-y-2">
-                  {["Akademik", "Non Akademik", "Bantuan", "Penelitian"].map(
-                    (option) => (
-                      <label
-                        key={option}
-                        className="flex items-center space-x-2 text-black"
-                      >
-                        <input
-                          type="checkbox"
-                          className="form-checkbox"
-                          checked={selectedCategoryFilters.includes(option)}
-                          onChange={() =>
-                            handleFilterChange("category", option)
-                          }
-                        />
-                        <span>{option}</span>
-                      </label>
-                    )
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Cards Section */}
-          <div className="flex-1">
-            <div
-              className={`grid ${
-                filteredScholarships.length === 1
-                  ? "grid-cols-1"
-                  : "grid-cols-1 md:grid-cols-2"
-              } gap-8`}
-            >
-              
                 {filteredScholarships.slice(0, 6).map((scholarship) => (
-                  <div
+                  <ScholarshipCard
                     key={scholarship.id}
-                    className="border rounded-lg p-6 shadow-md hover:shadow-lg transition cursor-pointer"
-                    onClick={() => handleCardClick(scholarship.id)}
-                  >
-                    <h3 className="text-xl font-bold mb-2 text-black">
-                      {scholarship.nama_beasiswa}
-                    </h3>
-                    <p className="text-black text-sm mb-4">
-                      {formatCustomDate(scholarship.tanggal_mulai)} -{" "}
-                      {formatCustomDate(scholarship.tanggal_akhir)}
-                    </p>
-                    <p className="text-black text-sm mb-4">
-                      {scholarship.deskripsi.split(".")[0]}.
-                    </p>
-                    <div className="flex items-center space-x-2 mb-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-sm ${
-                          getScholarshipStatus(
-                            scholarship.tanggal_mulai,
-                            scholarship.tanggal_akhir
-                          ) === "Active"
-                            ? "bg-green-200 text-green-700"
-                            : "bg-red-200 text-red-700"
-                        }`}
-                      >
-                        {getScholarshipStatus(
-                          scholarship.tanggal_mulai,
-                          scholarship.tanggal_akhir
-                        )}
-                      </span>
-                      <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm">
-                        {scholarship.kategori}
-                      </span>
-                    </div>
-                    <button className="text-blue-600 font-semibold hover:underline">
-                      See Details
-                    </button>
-                  </div>
-              ))}
-            </div>
-
-            {/* View More Button */}
-            {!isLoading && (
-              <div className="flex justify-end mt-8">
-                <button
-                  className="text-blue-600 font-semibold hover:underline"
-                  onClick={() => (window.location.href = "/scholars")}
-                >
-                  View More &gt;
-                </button>
+                    id={scholarship.id}
+                    nama_beasiswa={scholarship.nama_beasiswa}
+                    tanggal_mulai={scholarship.tanggal_mulai}
+                    tanggal_akhir={scholarship.tanggal_akhir}
+                    deskripsi={scholarship.deskripsi}
+                    kategori={scholarship.kategori}
+                    onClick={handleCardClick}
+                  />
+                ))}
               </div>
-            )}
+
+              {/* View More Button */}
+              {!isLoading && (
+                <div className="flex justify-end mt-8">
+                  <button
+                    className="text-blue-600 font-semibold hover:underline"
+                    onClick={() => (window.location.href = "/scholars")}
+                  >
+                    View More &gt;
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
       )}
       <Footer />
     </div>
-  )}
+  );
+}
