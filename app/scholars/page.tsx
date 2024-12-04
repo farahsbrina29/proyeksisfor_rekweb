@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Footer from "../../components/footer";
+import Footer from "../../components/layout/footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth, db } from "@/lib/firebaseConfig";

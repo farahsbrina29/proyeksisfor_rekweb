@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import HeroSection from "../components/heroSection";
-import Footer from "../components/footer";
+import HeroSection from "../components/layout/heroSection";
+import Footer from "../components/layout/footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth, db } from "@/lib/firebaseConfig";

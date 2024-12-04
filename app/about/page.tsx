@@ -1,4 +1,4 @@
-import Footer from "@/components/footer";
+import Footer from "@/components/layout/footer";
 import React from "react";
 import { FaUsers, FaGraduationCap } from "react-icons/fa";
 import { FaCheckCircle } from "react-icons/fa";

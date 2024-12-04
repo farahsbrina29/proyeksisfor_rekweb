@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Navbar from "@/components/Navbar"; // Navbar Anda
+import Navbar from "@/components/layout/Navbar"; // Navbar Anda
 import "../styles/globals.css"; 
 
 export default function RootLayout({
