@@ -1,15 +1,34 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Footer from "@/components/layout/footer";
-import React from "react";
 import { FaUsers, FaGraduationCap } from "react-icons/fa";
 import { FaCheckCircle } from "react-icons/fa";
 
 const AboutUs = () => {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <>
       {/* Hero Section */}
       <div
         className="relative h-screen bg-cover bg-center"
-        style={{ backgroundImage: "url('/assets/bg-about.jpg')" }}
+        style={{
+          backgroundImage: "url('/assets/bg-about.jpg')",
+          backgroundPosition: `center ${scrollY * 0.5}px`, // Parallax effect
+        }}
       >
         {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
