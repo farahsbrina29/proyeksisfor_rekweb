@@ -39,7 +39,7 @@ const AboutUs = () => {
             About ScholarHub
           </h1>
           <p className="text-sm md:text-base font-light max-w-md">
-            Welcome to ScholarHub – where opportunities meet potential!
+            Selamat Datang di Website Manajemen Beasiswa
           </p>
         </div>
       </div>
