@@ -1,101 +1,176 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import HeroSection from "@/components/layout/heroSection";
+import Footer from "@/components/layout/footer";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { auth, db } from "@/lib/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, getDocs } from "firebase/firestore";
+import FilterSection from "@/components/home/FilterSection";
+import ScholarshipCard from "@/components/home/ScholarshipCard";
+import HomeSkeletonLoader from "@/components/Loader/homeLoader";
+import { getScholarshipStatus, formatCustomDate } from "@/utility/scholarshipdatautility";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [scholarships, setScholarships] = useState<any[]>([]);
+  const [isActiveDropdownOpen, setIsActiveDropdownOpen] = useState(true);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(true);
+  const [selectedActiveFilters, setSelectedActiveFilters] = useState<string[]>([]);
+  const [selectedCategoryFilters, setSelectedCategoryFilters] = useState<string[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  // Ambil data beasiswa dari Firestore
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      setIsLoading(true);
+      try {
+        const scholarshipRef = collection(db, "scholarship");
+        const snapshot = await getDocs(scholarshipRef);
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setScholarships(data);
+      } catch (error) {
+        console.error("Error fetching scholarships:", error);
+        toast.error("Failed to fetch scholarships. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchScholarships();
+  }, []);
+
+  // Simulasikan status login pengguna
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setIsLoggedIn(!!currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Fungsi untuk menangani perubahan filter
+  const handleFilterChange = (filterType: string, value: string) => {
+    if (filterType === "active") {
+      setSelectedActiveFilters((prev) =>
+        prev.includes(value)
+          ? prev.filter((item) => item !== value)
+          : [...prev, value]
+      );
+    } else if (filterType === "category") {
+      setSelectedCategoryFilters((prev) =>
+        prev.includes(value)
+          ? prev.filter((item) => item !== value)
+          : [...prev, value]
+      );
+    }
+  };
+
+  // Reset Filters
+  const resetFilters = () => {
+    setSelectedActiveFilters([]);
+    setSelectedCategoryFilters([]);
+  };
+
+  // Fungsi untuk memfilter daftar beasiswa
+  const filteredScholarships = scholarships.filter((scholarship) => {
+    const status = getScholarshipStatus(
+      scholarship.tanggal_mulai,
+      scholarship.tanggal_akhir
+    );
+
+    const isActiveMatch =
+      selectedActiveFilters.length === 0 ||
+      (selectedActiveFilters.includes("Masih Berlangsung") && status === "Active") ||
+      (selectedActiveFilters.includes("Akan Berakhir") && status === "Inactive");
+
+    const isCategoryMatch =
+      selectedCategoryFilters.length === 0 ||
+      selectedCategoryFilters.includes(scholarship.kategori);
+
+    return isActiveMatch && isCategoryMatch;
+  });
+
+  // Fungsi untuk handle klik pada card
+  const handleCardClick = (id: string) => {
+    if (isLoggedIn) {
+      window.location.href = `/scholars/${id}`;
+    } else {
+      toast.error("Please sign in to view the scholarship details.", {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+  };
+
+  return (
+    <div>
+      <HeroSection />
+      {isLoading ? (
+        <HomeSkeletonLoader />
+      ) : (
+        <div className="bg-white py-16 px-16 mt-10">
+          <h1 className="text-4xl font-bold text-blue-900 mb-12">Found Scholar</h1>
+          <div className="flex flex-col md:flex-row gap-8">
+            {/* Filter Section */}
+            <FilterSection
+              isActiveDropdownOpen={isActiveDropdownOpen}
+              setIsActiveDropdownOpen={setIsActiveDropdownOpen}
+              isCategoryDropdownOpen={isCategoryDropdownOpen}
+              setIsCategoryDropdownOpen={setIsCategoryDropdownOpen}
+              selectedActiveFilters={selectedActiveFilters}
+              selectedCategoryFilters={selectedCategoryFilters}
+              handleFilterChange={handleFilterChange}
+              resetFilters={resetFilters}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+            {/* Cards Section */}
+            <div className="flex-1">
+              <div
+                className={`grid ${
+                  filteredScholarships.length === 1
+                    ? "grid-cols-1"
+                    : "grid-cols-1 md:grid-cols-2"
+                } gap-8`}
+              >
+                {filteredScholarships.slice(0, 6).map((scholarship) => (
+                  <ScholarshipCard
+                    key={scholarship.id}
+                    id={scholarship.id}
+                    nama_beasiswa={scholarship.nama_beasiswa}
+                    tanggal_mulai={scholarship.tanggal_mulai}
+                    tanggal_akhir={scholarship.tanggal_akhir}
+                    deskripsi={scholarship.deskripsi}
+                    kategori={scholarship.kategori}
+                    onClick={handleCardClick}
+                  />
+                ))}
+              </div>
+
+              {/* View More Button */}
+              {!isLoading && (
+                <div className="flex justify-end mt-8">
+                  <button
+                    className="text-blue-600 font-semibold hover:underline"
+                    onClick={() => (window.location.href = "/scholars")}
+                  >
+                    View More &gt;
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+      <Footer />
     </div>
   );
 }
